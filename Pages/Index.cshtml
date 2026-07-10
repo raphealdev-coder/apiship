@@ -1,0 +1,119 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "APIs made simple";
+}
+
+<!-- Hero -->
+<section class="hero">
+    <div class="container text-center">
+        <span class="badge-pill">API as a Service</span>
+        <h1 class="hero-title">Ship powerful APIs<br />without the heavy lifting</h1>
+        <p class="hero-sub">ApiShip gives developers fast, secure and scalable API infrastructure so you can
+            build, connect and deliver in minutes instead of months.</p>
+        <div class="hero-actions">
+            <a asp-page="/GetStarted" class="btn btn-brand btn-lg">Start free trial</a>
+            <a href="/#features" class="btn btn-outline-light btn-lg">Explore features</a>
+        </div>
+        <div class="hero-stats">
+            <div><strong>99.99%</strong><span>Uptime SLA</span></div>
+            <div><strong>40ms</strong><span>Avg. latency</span></div>
+            <div><strong>12k+</strong><span>Developers</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="section">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow">Features</span>
+            <h2>Everything you need to run APIs at scale</h2>
+            <p>A complete toolkit to design, secure and monitor every endpoint.</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var f in Model.Features)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon">@f.Icon</div>
+                        <h3>@f.Title</h3>
+                        <p>@f.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Reviews -->
+<section id="reviews" class="section section-alt">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow">Customer reviews</span>
+            <h2>Loved by developer teams</h2>
+            <p>See what our customers say about building with ApiShip.</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var r in Model.Reviews)
+            {
+                <div class="col-md-4">
+                    <div class="review-card h-100">
+                        <div class="stars">★★★★★</div>
+                        <p class="review-text">“@r.Quote”</p>
+                        <div class="review-author">
+                            <span class="avatar">@r.Initials</span>
+                            <div>
+                                <strong>@r.Name</strong>
+                                <small>@r.Role</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="section">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow">Pricing</span>
+            <h2>Simple plans that scale with you</h2>
+            <p>Start at $50/month. No hidden fees, cancel anytime.</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            @foreach (var p in Model.Plans)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="pricing-card h-100 @(p.Featured ? "featured" : "")">
+                        @if (p.Featured)
+                        {
+                            <span class="popular">Most popular</span>
+                        }
+                        <h3>@p.Name</h3>
+                        <div class="price"><span class="amount">$@p.Price</span><span class="period">/mo</span></div>
+                        <p class="plan-desc">@p.Description</p>
+                        <ul class="plan-features">
+                            @foreach (var item in p.Features)
+                            {
+                                <li>@item</li>
+                            }
+                        </ul>
+                        <a asp-page="/GetStarted" asp-route-plan="@p.Name" class="btn @(p.Featured ? "btn-brand" : "btn-outline-brand") w-100">Choose @p.Name</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <div class="container text-center">
+        <h2>Ready to ship your first API?</h2>
+        <p>Join thousands of developers building faster with ApiShip.</p>
+        <a asp-page="/GetStarted" asp-route-plan="Starter" class="btn btn-brand btn-lg">Get started for $50/mo</a>
+    </div>
+</section>

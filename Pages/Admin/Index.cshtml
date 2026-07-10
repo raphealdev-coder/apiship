@@ -1,0 +1,87 @@
+@page
+@model apiship.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin dashboard";
+}
+
+<section class="onboard-hero" style="padding-bottom:2rem;">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap">
+        <div class="text-start">
+            <span class="badge-pill">Admin</span>
+            <h1 class="mb-0">Submissions</h1>
+        </div>
+        <form method="post" asp-page-handler="Logout" class="mt-3 mt-md-0">
+            <button type="submit" class="btn btn-outline-light">Log out</button>
+        </form>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>@Model.Submissions.Count</h3>
+                    <p>Total submissions</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>$@Model.TotalRevenue<small class="text-muted">/mo</small></h3>
+                    <p>Recurring revenue</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">👤</div>
+                    <h3>@User.Identity?.Name</h3>
+                    <p>Signed in as</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Submissions.Count == 0)
+        {
+            <div class="success-card mx-auto text-center">
+                <h3>No submissions yet</h3>
+                <p class="text-muted">New sign-ups from the Get Started page will appear here.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle admin-table">
+                    <thead>
+                        <tr>
+                            <th>Created (UTC)</th>
+                            <th>Website</th>
+                            <th>Plan</th>
+                            <th>Price</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>File</th>
+                            <th>Deployment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Submissions)
+                        {
+                            <tr>
+                                <td>@s.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td><strong>@s.WebsiteName</strong><br /><small class="text-muted">@s.SiteUrl</small></td>
+                                <td>@s.Plan</td>
+                                <td>$@s.Price</td>
+                                <td>@s.FullName</td>
+                                <td>@s.Email</td>
+                                <td><small>@s.UploadFileName</small></td>
+                                <td><small>@s.DeploymentId</small></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

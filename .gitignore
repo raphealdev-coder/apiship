@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+
+# User-specific / secrets
+*.user
+secrets.json
+
+# Local database + runtime data
+*.db
+*.db-shm
+*.db-wal
+Uploads/
+SentEmails/
+
+# IDE
+.vs/
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store

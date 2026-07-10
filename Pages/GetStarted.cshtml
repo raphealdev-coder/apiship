@@ -1,0 +1,165 @@
+@page
+@model GetStartedModel
+@{
+    ViewData["Title"] = "Get started";
+}
+
+<section class="onboard-hero">
+    <div class="container text-center">
+        <span class="badge-pill">Start your free trial</span>
+        <h1>Launch your website on ApiShip</h1>
+        <p>Pick a plan, tell us about your site and upload your files. We'll handle the rest.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        @if (Model.CurrentStage == GetStartedModel.Stage.Done)
+        {
+            <div class="success-card mx-auto">
+                <div class="success-icon">✓</div>
+                <h2>You're all set!</h2>
+                <p>Your website <strong>@Model.Input.WebsiteName</strong> has been queued for deployment on the
+                    <strong>@Model.Input.Plan</strong> plan.</p>
+                <div class="deploy-meta">
+                    <div><span>Deployment ID</span><strong>@Model.PendingDeploymentId</strong></div>
+                    <div><span>Live URL</span><strong>@Model.SiteUrl</strong></div>
+                    <div><span>Status</span><strong class="status-building">Building…</strong></div>
+                </div>
+                <p class="text-muted">A confirmation was sent to @Model.Input.Email. You can close this tab.</p>
+                <a asp-page="/Index" class="btn btn-outline-brand">Back to home</a>
+            </div>
+        }
+        else if (Model.CurrentStage == GetStartedModel.Stage.Review)
+        {
+            <div class="success-card mx-auto">
+                <h2 class="text-center">Review &amp; confirm</h2>
+                <p class="text-center text-muted">Check your order summary before we deploy.</p>
+
+                <div class="summary-plan">
+                    <div>
+                        <span class="summary-plan-name">@Model.SelectedPlan.Name plan</span>
+                        <span class="summary-plan-sub">@Model.SelectedPlan.Summary</span>
+                    </div>
+                    <div class="summary-plan-price">$@Model.SelectedPlan.Price<small>/mo</small></div>
+                </div>
+
+                <div class="deploy-meta">
+                    <div><span>Website name</span><strong>@Model.Input.WebsiteName</strong></div>
+                    <div><span>Contact</span><strong>@Model.Input.FullName</strong></div>
+                    <div><span>Email</span><strong>@Model.Input.Email</strong></div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Input.Domain))
+                    {
+                        <div><span>Domain</span><strong>@Model.Input.Domain</strong></div>
+                    }
+                    <div><span>Uploaded file</span><strong>@Model.UploadedFileName</strong></div>
+                    <div><span>Billed today</span><strong>$0.00 (14-day trial)</strong></div>
+                    <div><span>Then</span><strong>$@Model.SelectedPlan.Price / month</strong></div>
+                </div>
+
+                <form method="post" asp-page-handler="Confirm">
+                    <input type="hidden" asp-for="Input.FullName" />
+                    <input type="hidden" asp-for="Input.Email" />
+                    <input type="hidden" asp-for="Input.WebsiteName" />
+                    <input type="hidden" asp-for="Input.Domain" />
+                    <input type="hidden" asp-for="Input.Plan" />
+                    <input type="hidden" asp-for="Input.Notes" />
+                    <input type="hidden" asp-for="PendingDeploymentId" />
+                    <input type="hidden" asp-for="UploadedFileName" />
+                    <button type="submit" class="btn btn-brand btn-lg w-100 mt-2">Confirm &amp; deploy</button>
+                </form>
+                <a asp-page="/GetStarted" asp-route-plan="@Model.Input.Plan" class="btn btn-link w-100 mt-2">← Edit details</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-5 onboard-grid">
+                <div class="col-lg-7">
+                    <form method="post" asp-page-handler="Review" enctype="multipart/form-data" class="onboard-form" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <h3 class="form-step">1. Choose your plan</h3>
+                        <div class="plan-picker">
+                            @foreach (var p in GetStartedModel.Plans)
+                            {
+                                <label class="plan-radio">
+                                    <input type="radio" asp-for="Input.Plan" value="@p.Name"
+                                           checked="@(string.Equals(Model.Input.Plan, p.Name, StringComparison.OrdinalIgnoreCase))" />
+                                    <span class="plan-radio-body">
+                                        <span class="plan-radio-name">@p.Name</span>
+                                        <span class="plan-radio-price">$@p.Price<small>/mo</small></span>
+                                        <span class="plan-radio-summary">@p.Summary</span>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                        <span asp-validation-for="Input.Plan" class="text-danger"></span>
+
+                        <h3 class="form-step">2. Your details</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.FullName" class="form-label"></label>
+                                <input asp-for="Input.FullName" class="form-control" placeholder="Jane Doe" />
+                                <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Email" class="form-label"></label>
+                                <input asp-for="Input.Email" class="form-control" placeholder="jane@company.com" />
+                                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <h3 class="form-step">3. Your website</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.WebsiteName" class="form-label"></label>
+                                <input asp-for="Input.WebsiteName" class="form-control" placeholder="My Awesome Site" />
+                                <span asp-validation-for="Input.WebsiteName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Domain" class="form-label"></label>
+                                <input asp-for="Input.Domain" class="form-control" placeholder="https://example.com" />
+                                <span asp-validation-for="Input.Domain" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label for="Upload" class="form-label">Upload website files (.zip)</label>
+                                <input type="file" name="Upload" id="Upload" class="form-control" accept=".zip" />
+                                <small class="text-muted">Zip your site (HTML/CSS/JS or build output). Max 25 MB.</small>
+                                <span asp-validation-for="Upload" class="text-danger d-block"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Input.Notes" class="form-label">Anything we should know? (optional)</label>
+                                <textarea asp-for="Input.Notes" class="form-control" rows="3"
+                                          placeholder="Build command, framework, special requirements…"></textarea>
+                                <span asp-validation-for="Input.Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-brand btn-lg mt-4 w-100">Continue to review</button>
+                        <p class="text-muted small text-center mt-2">14-day free trial. No credit card required to start.</p>
+                    </form>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="onboard-aside">
+                        <h4>What happens next?</h4>
+                        <ul class="steps-list">
+                            <li><strong>Instant setup</strong> — we provision your API endpoints and hosting.</li>
+                            <li><strong>We deploy your files</strong> — your uploaded site goes live on a secure URL.</li>
+                            <li><strong>Go live</strong> — connect your domain whenever you're ready.</li>
+                        </ul>
+                        <div class="aside-note">
+                            <span class="stars">★★★★★</span>
+                            <p>“Setup took minutes and our site was live before lunch.”</p>
+                            <small>— Mia Torres, Founder at Shiply</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

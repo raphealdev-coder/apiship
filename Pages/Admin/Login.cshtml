@@ -1,0 +1,42 @@
+@page
+@model apiship.Pages.Admin.LoginModel
+@{
+    ViewData["Title"] = "Admin login";
+}
+
+<section class="onboard-hero">
+    <div class="container text-center">
+        <span class="badge-pill">Admin area</span>
+        <h1>Sign in</h1>
+        <p>Restricted access. Authorized administrators only.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="success-card mx-auto" style="max-width:420px;">
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+            <form method="post" class="onboard-form" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Username" class="form-label">Username</label>
+                    <input asp-for="Input.Username" class="form-control" autocomplete="username" />
+                    <span asp-validation-for="Input.Username" class="text-danger"></span>
+                </div>
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <input asp-for="Input.Password" type="password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-brand btn-lg w-100">Sign in</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
