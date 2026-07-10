@@ -228,11 +228,58 @@ a {
     word-break: break-word;
 }
 
+.t-line {
+    opacity: 0;
+    transform: translateY(6px);
+    animation: lineIn .4s ease forwards;
+}
+
+.t-gap {
+    min-height: 1.6em;
+}
+
+.t-line:nth-child(1) { animation-delay: .2s; }
+.t-line:nth-child(2) { animation-delay: .7s; }
+.t-line:nth-child(3) { animation-delay: 1.0s; }
+.t-line:nth-child(4) { animation-delay: 1.3s; }
+.t-line:nth-child(5) { animation-delay: 1.6s; }
+.t-line:nth-child(6) { animation-delay: 1.9s; }
+.t-line:nth-child(7) { animation-delay: 2.2s; }
+.t-line:nth-child(8) { animation-delay: 2.5s; }
+
+@keyframes lineIn {
+    to { opacity: 1; transform: none; }
+}
+
+.t-caret {
+    display: inline-block;
+    width: 8px;
+    height: 1.05em;
+    margin-left: 4px;
+    vertical-align: -2px;
+    background: #00d2ff;
+    opacity: 0;
+    animation: caretIn 0s linear 2.7s forwards, blink 1.05s steps(1) 2.7s infinite;
+}
+
+@keyframes caretIn {
+    to { opacity: 1; }
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
 .t-prompt { color: #00d2ff; }
 .t-cmd { color: #a5b4fc; }
 .t-out { color: #8b93aa; }
 .t-ok { color: #27c93f; }
 .t-num { color: #ffbd2e; }
+
+@media (prefers-reduced-motion: reduce) {
+    .t-line { opacity: 1; transform: none; animation: none; }
+    .t-caret { opacity: 1; animation: blink 1.05s steps(1) infinite; }
+}
 
 /* Sections */
 .section {
