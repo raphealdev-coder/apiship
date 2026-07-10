@@ -36,9 +36,10 @@ public class IndexModel : PageModel
 
     public List<Partner> Partners { get; } = new()
     {
-        new("Nimbus", "☁️"), new("Payflow", "💳"), new("Shiply", "📦"),
-        new("Voxa", "🎙️"), new("Nomad Labs", "🧭"), new("Bytebar", "⚡"),
-        new("Quantic", "🔷"), new("Orbit", "🛰️")
+        new("Nimbus", "/img/partners/nimbus.svg"), new("Payflow", "/img/partners/payflow.svg"),
+        new("Shiply", "/img/partners/shiply.svg"), new("Voxa", "/img/partners/voxa.svg"),
+        new("Nomad Labs", "/img/partners/nomad.svg"), new("Bytebar", "/img/partners/bytebar.svg"),
+        new("Quantic", "/img/partners/quantic.svg"), new("Orbit", "/img/partners/orbit.svg")
     };
 
     public List<Plan> Plans { get; } = new()
@@ -79,5 +80,5 @@ public record Review(string Quote, string Name, string Role, string Initials);
 
 public record Plan(string Name, int Price, string Description, string[] Features, bool Featured);
 
-public record Partner(string Name, string Mark);
+public record Partner(string Name, string Logo);
 

@@ -20,6 +20,20 @@
             <div><strong>40ms</strong><span>Avg. latency</span></div>
             <div><strong>12k+</strong><span>Developers</span></div>
         </div>
+        <div class="terminal-card">
+            <div class="terminal-bar">
+                <span class="tdot tred"></span><span class="tdot tyellow"></span><span class="tdot tgreen"></span>
+                <span class="terminal-title">bash — apiship</span>
+            </div>
+            <pre class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">curl https://api.apiship.app/v1/data \</span>
+     <span class="t-cmd">-H "Authorization: Bearer sk_live_••••••••"</span>
+
+<span class="t-out">{</span>
+<span class="t-out">  "status": <span class="t-ok">"ok"</span>,</span>
+<span class="t-out">  "latency_ms": <span class="t-num">38</span>,</span>
+<span class="t-out">  "records": <span class="t-num">1240</span></span>
+<span class="t-out">}</span></pre>
+        </div>
     </div>
 </section>
 
@@ -188,7 +202,7 @@
         <div class="marquee-track">
             @foreach (var p in Model.Partners.Concat(Model.Partners))
             {
-                <div class="logo-chip"><span class="logo-mark">@p.Mark</span> @p.Name</div>
+                <div class="logo-chip"><img src="@p.Logo" alt="@p.Name logo" class="logo-mark" /> @p.Name</div>
             }
         </div>
     </div>
@@ -196,7 +210,7 @@
         <div class="marquee-track marquee-reverse">
             @foreach (var p in Model.Partners.AsEnumerable().Reverse().Concat(Model.Partners.AsEnumerable().Reverse()))
             {
-                <div class="logo-chip"><span class="logo-mark">@p.Mark</span> @p.Name</div>
+                <div class="logo-chip"><img src="@p.Logo" alt="@p.Name logo" class="logo-mark" /> @p.Name</div>
             }
         </div>
     </div>

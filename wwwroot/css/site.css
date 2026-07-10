@@ -85,10 +85,44 @@ a {
 
 /* Hero */
 .hero {
+    position: relative;
+    overflow: hidden;
     background: radial-gradient(1200px 500px at 50% -10%, rgba(108, 92, 231, .45), transparent),
                 linear-gradient(180deg, var(--ink), var(--ink-2));
     color: #fff;
     padding: 11rem 0 6rem;
+}
+
+/* Tech grid + glow overlay */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 72%);
+    pointer-events: none;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    left: 50%;
+    top: -180px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(0, 210, 255, .25), transparent 60%);
+    filter: blur(30px);
+    pointer-events: none;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 1;
 }
 
 .badge-pill {
@@ -143,6 +177,62 @@ a {
     color: var(--muted);
     font-size: .9rem;
 }
+
+/* Hero terminal / code card */
+.terminal-card {
+    max-width: 620px;
+    margin: 3.5rem auto 0;
+    text-align: left;
+    background: #0d1326;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, .45);
+}
+
+.terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .7rem 1rem;
+    background: rgba(255, 255, 255, .04);
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+}
+
+.tdot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.tred { background: #ff5f56; }
+.tyellow { background: #ffbd2e; }
+.tgreen { background: #27c93f; }
+
+.terminal-title {
+    margin-left: auto;
+    color: #6b7189;
+    font-size: .8rem;
+    font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+}
+
+.terminal-body {
+    margin: 0;
+    padding: 1.2rem 1.3rem;
+    font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+    font-size: .88rem;
+    line-height: 1.6;
+    color: #c7ccdb;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.t-prompt { color: #00d2ff; }
+.t-cmd { color: #a5b4fc; }
+.t-out { color: #8b93aa; }
+.t-ok { color: #27c93f; }
+.t-num { color: #ffbd2e; }
 
 /* Sections */
 .section {
@@ -377,7 +467,9 @@ a {
 }
 
 .logo-mark {
-    font-size: 1.3rem;
+    width: 26px;
+    height: 26px;
+    display: inline-block;
 }
 
 @keyframes marquee {
