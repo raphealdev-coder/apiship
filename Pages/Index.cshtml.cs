@@ -19,7 +19,9 @@ public class IndexModel : PageModel
         new("📈", "Real-time analytics", "Track usage, errors and latency with dashboards updated in real time."),
         new("🧩", "Easy integration", "Clean REST endpoints and SDKs get you connected in just a few lines of code."),
         new("🔁", "Auto scaling", "Handle one request or a million — infrastructure scales automatically."),
-        new("🛠️", "99.99% uptime", "Resilient, redundant architecture backed by an enterprise-grade SLA.")
+        new("🛠️", "99.99% uptime", "Resilient, redundant architecture backed by an enterprise-grade SLA."),
+        new("🌍", "Global edge", "Requests are served from the region closest to your users worldwide."),
+        new("📚", "Great docs & SDKs", "Clear guides and client libraries for JavaScript, Python, Go and more.")
     };
 
     public List<Review> Reviews { get; } = new()

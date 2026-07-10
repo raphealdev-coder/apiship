@@ -46,6 +46,81 @@
     </div>
 </section>
 
+<!-- Analytics -->
+<section id="analytics" class="section section-dark">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow eyebrow-light">Analytics</span>
+            <h2 class="text-white">Real-time insight into every request</h2>
+            <p class="text-light-muted">Track traffic, latency and errors from one live dashboard.</p>
+        </div>
+        <div class="dashboard-card">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="chart-head">
+                        <div>
+                            <span class="chart-title">API requests</span>
+                            <span class="chart-value">4.82M<small>this month</small></span>
+                        </div>
+                        <span class="chart-trend">▲ 18.4%</span>
+                    </div>
+                    <canvas id="requestsChart" height="150"></canvas>
+                </div>
+                <div class="col-lg-4">
+                    <span class="chart-title">Traffic by endpoint</span>
+                    <canvas id="endpointChart" height="180"></canvas>
+                    <div class="mini-stats">
+                        <div><span class="dot dot-1"></span>/v1/data <strong>46%</strong></div>
+                        <div><span class="dot dot-2"></span>/v1/auth <strong>29%</strong></div>
+                        <div><span class="dot dot-3"></span>/v1/files <strong>15%</strong></div>
+                        <div><span class="dot dot-4"></span>other <strong>10%</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-6 col-md-3"><div class="kpi"><span>Avg latency</span><strong>38ms</strong></div></div>
+                <div class="col-6 col-md-3"><div class="kpi"><span>Success rate</span><strong>99.98%</strong></div></div>
+                <div class="col-6 col-md-3"><div class="kpi"><span>Error rate</span><strong>0.02%</strong></div></div>
+                <div class="col-6 col-md-3"><div class="kpi"><span>Active keys</span><strong>1,204</strong></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section id="how" class="section">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow">How it works</span>
+            <h2>Go live in three simple steps</h2>
+            <p>From sign-up to production in minutes.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card h-100">
+                    <span class="step-num">01</span>
+                    <h3>Create your account</h3>
+                    <p>Pick a plan and get instant access to your API keys and dashboard.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card h-100">
+                    <span class="step-num">02</span>
+                    <h3>Connect your app</h3>
+                    <p>Drop in our SDK or call the REST endpoints directly — just a few lines of code.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card h-100">
+                    <span class="step-num">03</span>
+                    <h3>Scale with confidence</h3>
+                    <p>Monitor usage in real time while we handle scaling, security and uptime.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Reviews -->
 <section id="reviews" class="section section-alt">
     <div class="container">
@@ -117,3 +192,61 @@
         <a asp-page="/GetStarted" asp-route-plan="Starter" class="btn btn-brand btn-lg">Get started for $50/mo</a>
     </div>
 </section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            var brand = '#6c5ce7', brand2 = '#00d2ff';
+            var reqEl = document.getElementById('requestsChart');
+            if (reqEl && window.Chart) {
+                var ctx = reqEl.getContext('2d');
+                var grad = ctx.createLinearGradient(0, 0, 0, 220);
+                grad.addColorStop(0, 'rgba(108,92,231,0.35)');
+                grad.addColorStop(1, 'rgba(108,92,231,0)');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Requests',
+                            data: [520000, 610000, 580000, 720000, 690000, 840000, 760000],
+                            borderColor: brand,
+                            backgroundColor: grad,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointBackgroundColor: brand2
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#9aa0b2' } },
+                            y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#9aa0b2' } }
+                        }
+                    }
+                });
+            }
+            var epEl = document.getElementById('endpointChart');
+            if (epEl && window.Chart) {
+                new Chart(epEl, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['/v1/data', '/v1/auth', '/v1/files', 'other'],
+                        datasets: [{
+                            data: [46, 29, 15, 10],
+                            backgroundColor: [brand, brand2, '#22c55e', '#3b4258'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '68%',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        })();
+    </script>
+}
