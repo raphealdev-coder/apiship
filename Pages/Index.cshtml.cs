@@ -28,7 +28,17 @@ public class IndexModel : PageModel
     {
         new("ApiShip cut our integration time from weeks to a single afternoon. The docs are fantastic.", "Sarah Lin", "CTO, Nimbus", "SL"),
         new("Reliable, fast and easy to monitor. Our team finally stopped worrying about API infrastructure.", "David Okoye", "Lead Dev, Payflow", "DO"),
-        new("The analytics dashboard alone is worth it. We caught issues before customers ever noticed.", "Mia Torres", "Founder, Shiply", "MT")
+        new("The analytics dashboard alone is worth it. We caught issues before customers ever noticed.", "Mia Torres", "Founder, Shiply", "MT"),
+        new("We shipped our MVP a month early. The live API keys and cron jobs just worked out of the box.", "Ahmed Farouk", "CTO, Nomad Labs", "AF"),
+        new("Support is incredible and the uptime is rock solid. Best decision we made this year.", "Elena Petrova", "Engineering Lead, Voxa", "EP"),
+        new("Scaling used to keep me up at night. Now it's fully automatic and I sleep just fine.", "James Carter", "Founder, Bytebar", "JC")
+    };
+
+    public List<Partner> Partners { get; } = new()
+    {
+        new("Nimbus", "☁️"), new("Payflow", "💳"), new("Shiply", "📦"),
+        new("Voxa", "🎙️"), new("Nomad Labs", "🧭"), new("Bytebar", "⚡"),
+        new("Quantic", "🔷"), new("Orbit", "🛰️")
     };
 
     public List<Plan> Plans { get; } = new()
@@ -68,4 +78,6 @@ public record Feature(string Icon, string Title, string Description);
 public record Review(string Quote, string Name, string Role, string Initials);
 
 public record Plan(string Name, int Price, string Description, string[] Features, bool Featured);
+
+public record Partner(string Name, string Mark);
 

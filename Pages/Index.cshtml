@@ -175,6 +175,33 @@
     </div>
 </section>
 
+<!-- Trusted partners -->
+<section id="partners" class="section section-alt partners-section">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow">Trusted partners</span>
+            <h2>Powering teams at fast-growing companies</h2>
+            <p>Thousands of developers and businesses build on ApiShip.</p>
+        </div>
+    </div>
+    <div class="marquee">
+        <div class="marquee-track">
+            @foreach (var p in Model.Partners.Concat(Model.Partners))
+            {
+                <div class="logo-chip"><span class="logo-mark">@p.Mark</span> @p.Name</div>
+            }
+        </div>
+    </div>
+    <div class="marquee">
+        <div class="marquee-track marquee-reverse">
+            @foreach (var p in Model.Partners.AsEnumerable().Reverse().Concat(Model.Partners.AsEnumerable().Reverse()))
+            {
+                <div class="logo-chip"><span class="logo-mark">@p.Mark</span> @p.Name</div>
+            }
+        </div>
+    </div>
+</section>
+
 <!-- Reviews -->
 <section id="reviews" class="section section-alt">
     <div class="container">
