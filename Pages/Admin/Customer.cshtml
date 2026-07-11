@@ -1,0 +1,181 @@
+@page "{id:int}"
+@using apiship.Data
+@model apiship.Pages.Admin.CustomerModel
+@{
+    ViewData["Title"] = "Customer detail";
+    ViewData["ActiveNav"] = "customers";
+    var c = Model.Customer;
+}
+
+<section class="admin-topbar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-page="/Admin/Customers" class="admin-back">←</a>
+            <div>
+                <span class="admin-eyebrow">Customer</span>
+                <h1 class="admin-title">@c.FullName</h1>
+            </div>
+        </div>
+        <span class="status-chip @c.Status.ChipClass()">@c.Status.Label()</span>
+    </div>
+</section>
+
+<partial name="_AdminNav" />
+
+<section class="admin-body">
+    <div class="container">
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="admin-flash">@Model.StatusMessage</div>
+        }
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-label">Projects</span>
+                    <span class="stat-value">@c.Projects.Count</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-label">Monthly spend</span>
+                    <span class="stat-value">$@Model.MonthlySpend.ToString("N0")<small>/mo</small></span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-label">API calls</span>
+                    <span class="stat-value stat-value--ok">@Model.TotalApiCalls.ToString("N0")</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-label">Joined</span>
+                    <span class="stat-value" style="font-size:1.1rem;">@c.CreatedUtc.ToString("yyyy-MM-dd")</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="admin-panel admin-detail">
+                    <h2 class="admin-detail-heading">Contact</h2>
+                    <dl class="admin-detail-grid">
+                        <dt>Name</dt>
+                        <dd>@c.FullName</dd>
+                        <dt>Email</dt>
+                        <dd><a href="mailto:@c.Email">@c.Email</a></dd>
+                        <dt>Company</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(c.Company) ? "—" : c.Company)</dd>
+                    </dl>
+
+                    <h2 class="admin-detail-heading">Projects</h2>
+                    @if (c.Projects.Count == 0)
+                    {
+                        <p class="admin-cell-sub">This customer has no projects.</p>
+                    }
+                    else
+                    {
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Plan</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in c.Projects)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="admin-cell-title">@p.Name</span>
+                                                <span class="admin-cell-sub">@p.SiteUrl</span>
+                                            </td>
+                                            <td><span class="admin-plan">@p.Plan</span> <span class="admin-cell-sub">$@p.Price/mo</span></td>
+                                            <td>
+                                                <span class="status-chip @p.Status.ChipClass()">
+                                                    <span class="status-chip-dot">@p.Status.Icon()</span>@p.Status.Label()
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a asp-page="/Admin/Details" asp-route-id="@p.Id" class="admin-btn-mini">View</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="admin-panel admin-actions">
+                    <h2 class="admin-detail-heading">Edit details</h2>
+                    <form method="post" asp-page-handler="Edit" asp-route-id="@c.Id" class="onboard-form">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                        <div class="mb-2 text-start">
+                            <label asp-for="Edit.FullName" class="form-label"></label>
+                            <input asp-for="Edit.FullName" class="form-control" />
+                            <span asp-validation-for="Edit.FullName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-2 text-start">
+                            <label asp-for="Edit.Email" class="form-label"></label>
+                            <input asp-for="Edit.Email" class="form-control" />
+                            <span asp-validation-for="Edit.Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Edit.Company" class="form-label"></label>
+                            <input asp-for="Edit.Company" class="form-control" />
+                            <span asp-validation-for="Edit.Company" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn admin-btn-primary w-100">Save details</button>
+                    </form>
+
+                    <h2 class="admin-detail-heading">Account</h2>
+                    <p class="admin-cell-sub mb-2">
+                        Login: <strong>@(c.HasLogin ? "registered" : "not registered")</strong>
+                    </p>
+                    <p class="admin-cell-sub mb-3">
+                        @(c.Status == CustomerStatus.Active
+                            ? "Suspending blocks sign-in and new deployments for this customer."
+                            : "Reactivate to restore full access.")
+                    </p>
+                    <form method="post" asp-page-handler="Toggle" asp-route-id="@c.Id">
+                        @if (c.Status == CustomerStatus.Active)
+                        {
+                            <button type="submit" class="admin-status-option status-chip--rejected w-100">Suspend customer</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="admin-status-option status-chip--deployed w-100">Reactivate customer</button>
+                        }
+                    </form>
+
+                    <h2 class="admin-detail-heading">@(c.HasLogin ? "Reset password" : "Set password")</h2>
+                    <p class="admin-cell-sub mb-2">
+                        @(c.HasLogin
+                            ? "Set a new password for this customer (e.g. after a reset request)."
+                            : "Give this customer a login by setting an initial password.")
+                    </p>
+                    <form method="post" asp-page-handler="SetPassword" asp-route-id="@c.Id" class="onboard-form">
+                        <div class="mb-2 text-start">
+                            <input asp-for="NewPassword" type="password" class="form-control"
+                                   placeholder="New password (min 8 chars)" autocomplete="new-password" />
+                        </div>
+                        <button type="submit" class="btn admin-btn-primary w-100">@(c.HasLogin ? "Reset password" : "Set password")</button>
+                    </form>
+
+                    <h2 class="admin-detail-heading">Danger zone</h2>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@c.Id"
+                          onsubmit="return confirm('Delete @c.FullName and all their projects and API keys? This cannot be undone.');">
+                        <button type="submit" class="admin-status-option status-chip--rejected w-100">Delete customer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

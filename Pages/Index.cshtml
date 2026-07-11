@@ -116,6 +116,30 @@
     </div>
 </section>
 
+<!-- API product types -->
+<section id="apis" class="section section-alt">
+    <div class="container">
+        <div class="section-head text-center">
+            <span class="eyebrow">API types</span>
+            <h2>Connect any part of your store</h2>
+            <p>Pick the APIs you need — mix and match across all your stores.</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var api in apiship.Data.ApiProductCatalog.Products)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="api-type-card h-100">
+                        <div class="api-type-icon">@api.Icon</div>
+                        <h3>@api.Name</h3>
+                        <p>@api.Summary</p>
+                        <a asp-page="/GetStarted" class="api-type-link">Start with this API →</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
 <!-- Analytics -->
 <section id="analytics" class="section section-dark">
     <div class="container">

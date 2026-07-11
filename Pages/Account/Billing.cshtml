@@ -1,0 +1,173 @@
+@page
+@using apiship.Data
+@model apiship.Pages.Account.BillingModel
+@{
+    ViewData["Title"] = "Subscription & billing";
+    var monthlyNgn = Model.NgnFor(Model.MonthlyTotalUsd);
+    var yearlyNgn = Model.NgnFor(Model.YearlyTotalUsd);
+}
+
+<section class="account-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <a asp-page="/Account/Index" class="account-back">← Dashboard</a>
+            <h1 class="mb-0">Store Sync &amp; API Connector</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-page="/Account/Profile" class="btn btn-outline-light">Billing details</a>
+            <form method="post" asp-page-handler="Logout" class="m-0">
+                <button type="submit" class="btn btn-outline-light">Log out</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container" style="max-width:960px;">
+        <p class="text-muted">
+            The connector keeps inventory, prices and orders synchronised in real time across all your stores.
+            Keep your subscription active to avoid synchronisation errors between branches.
+        </p>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="admin-flash">@Model.StatusMessage</div>
+        }
+
+        @if (Model.AllSubscribed)
+        {
+            <div class="sub-banner sub-banner--ok">
+                <strong>✓ Your connector subscription is active.</strong>
+                <span>Next billing @Model.Projects.Select(p => p.NextBillingUtc).Min().ToString("d MMMM yyyy") · billed @Model.Projects.First().BillingCycle.ToString().ToLowerInvariant().</span>
+            </div>
+        }
+        else if (Model.TrialEnds is not null)
+        {
+            <div class="sub-banner sub-banner--trial">
+                <span class="sub-banner-icon">⚠️</span>
+                <div>
+                    <strong>You're on the free trial connector.</strong>
+                    <span>It expires on @Model.TrialEnds.Value.ToString("d MMMM yyyy"). Subscribe below to keep your stores in sync after that date.</span>
+                </div>
+            </div>
+        }
+
+        @if (Model.StoreCount == 0)
+        {
+            <div class="success-card mx-auto text-center mt-4">
+                <div class="success-icon">🏪</div>
+                <h3>No stores yet</h3>
+                <p class="text-muted">Add a store to start syncing.</p>
+                <a asp-page="/GetStarted" class="btn btn-brand">Add a store</a>
+            </div>
+        }
+        else
+        {
+            <div class="sub-table-card">
+                <table class="sub-table">
+                    <thead>
+                        <tr>
+                            <th>Store</th>
+                            <th>API key</th>
+                            <th>Status</th>
+                            <th class="text-end">Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model.Projects)
+                        {
+                            var key = p.ApiKeys.FirstOrDefault(k => !k.Revoked)?.Prefix;
+                            <tr>
+                                <td>
+                                    <span class="sub-store">@p.Name</span>
+                                    <span class="admin-cell-sub">@ApiProductCatalog.DisplayName(p.ApiType)</span>
+                                </td>
+                                <td>
+                                    @if (key is not null)
+                                    {
+                                        <code class="sub-key" data-key="@key">@key••••••</code>
+                                        <button type="button" class="sub-copy" onclick="copyKey(this)">Copy</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-cell-sub">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (p.IsSubscribed)
+                                    {
+                                        <span class="status-chip status-chip--deployed">Active</span>
+                                    }
+                                    else if (p.IsInTrial)
+                                    {
+                                        <span class="status-chip status-chip--pending">Trial</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-chip status-chip--rejected">Expired</span>
+                                    }
+                                </td>
+                                <td class="text-end sub-fee">
+                                    $@Model.PriceMonthlyUsd <small>/ mo</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.AllSubscribed)
+            {
+                <form method="post" asp-page-handler="Subscribe" class="sub-plan-card">
+                    <h3 class="sub-plan-title">Choose a plan</h3>
+                    <div class="sub-plan-grid">
+                        <label class="sub-plan">
+                            <input type="radio" name="cycle" value="monthly" checked />
+                            <span class="sub-plan-body">
+                                <span class="sub-plan-name">Monthly</span>
+                                <span class="sub-plan-desc">$@Model.PriceMonthlyUsd per store, billed monthly</span>
+                            </span>
+                        </label>
+                        <label class="sub-plan">
+                            <input type="radio" name="cycle" value="yearly" />
+                            <span class="sub-plan-body">
+                                <span class="sub-plan-name">Yearly <span class="sub-plan-tag">save vs monthly</span></span>
+                                <span class="sub-plan-desc">$@Model.PriceYearlyUsd per store, billed yearly</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="sub-plan-foot">
+                        <div>
+                            <div class="sub-total">
+                                @Model.StoreCount store@(Model.StoreCount == 1 ? "" : "s") × $@Model.PriceMonthlyUsd =
+                                <strong>$@Model.MonthlyTotalUsd</strong> / month
+                            </div>
+                            <div class="sub-total-ngn">
+                                Charged in Naira: ₦@monthlyNgn.ToString("N0") (at ₦@Model.Rate.ToString("N0")/$)
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-brand btn-lg">Pay &amp; subscribe — $@Model.MonthlyTotalUsd/month</button>
+                    </div>
+                    <p class="sub-note">
+                        Prices are in US dollars; you'll be charged the equivalent in Naira at today's rate on Paystack's
+                        secure checkout. Your subscription activates automatically once payment is confirmed.
+                    </p>
+                </form>
+            }
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function copyKey(btn) {
+            var code = btn.previousElementSibling;
+            var text = code ? (code.getAttribute('data-key') || code.textContent) : '';
+            navigator.clipboard.writeText(text).then(function () {
+                var old = btn.textContent; btn.textContent = 'Copied';
+                setTimeout(function () { btn.textContent = old; }, 1200);
+            });
+        }
+    </script>
+}

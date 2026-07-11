@@ -1,0 +1,187 @@
+@page "{id:int}"
+@using apiship.Data
+@model apiship.Pages.Admin.DetailsModel
+@{
+    ViewData["Title"] = "Project detail";
+    ViewData["ActiveNav"] = "projects";
+    var p = Model.Project;
+}
+
+<section class="admin-topbar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-page="/Admin/Index" class="admin-back">←</a>
+            <div>
+                <span class="admin-eyebrow">Project</span>
+                <h1 class="admin-title">@p.Name</h1>
+            </div>
+        </div>
+        <span class="status-chip @p.Status.ChipClass()">
+            <span class="status-chip-dot">@p.Status.Icon()</span>@p.Status.Label()
+        </span>
+    </div>
+</section>
+
+<partial name="_AdminNav" />
+
+<section class="admin-body">
+    <div class="container">
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="admin-flash">@Model.StatusMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.NewApiKey))
+        {
+            <div class="apikey-reveal">
+                <span class="apikey-reveal-label">🔑 New API key — copy it now, it won't be shown again</span>
+                <code class="apikey-reveal-value">@Model.NewApiKey</code>
+            </div>
+        }
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="admin-panel admin-detail">
+                    <h2 class="admin-detail-heading">Customer</h2>
+                    <dl class="admin-detail-grid">
+                        <dt>Name</dt>
+                        <dd>
+                            @if (p.Customer is not null)
+                            {
+                                <a asp-page="/Admin/Customer" asp-route-id="@p.Customer.Id">@p.Customer.FullName</a>
+                            }
+                        </dd>
+                        <dt>Email</dt>
+                        <dd><a href="mailto:@p.Customer?.Email">@p.Customer?.Email</a></dd>
+                        <dt>Existing domain</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(p.Domain) ? "—" : p.Domain)</dd>
+                    </dl>
+
+                    <h2 class="admin-detail-heading">Deployment</h2>
+                    <dl class="admin-detail-grid">
+                        <dt>Deployment ID</dt>
+                        <dd><code>@p.DeploymentId</code></dd>
+                        <dt>Live URL</dt>
+                        <dd><a href="@p.SiteUrl" target="_blank" rel="noopener">@p.SiteUrl</a></dd>
+                        <dt>Plan</dt>
+                        <dd><span class="admin-plan">@p.Plan</span> · $@p.Price/mo</dd>
+                        <dt>Uploaded bundle</dt>
+                        <dd>
+                            @if (Model.UploadExists)
+                            {
+                                <a asp-page-handler="Download" asp-route-id="@p.Id" class="admin-btn-mini">⬇ @p.UploadFileName</a>
+                            }
+                            else
+                            {
+                                <span class="admin-cell-sub">@p.UploadFileName (file unavailable)</span>
+                            }
+                        </dd>
+                        <dt>Created</dt>
+                        <dd>@p.CreatedUtc.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                        @if (p.StatusUpdatedUtc is not null)
+                        {
+                            <dt>Status changed</dt>
+                            <dd>@p.StatusUpdatedUtc.Value.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                        }
+                    </dl>
+
+                    @if (!string.IsNullOrWhiteSpace(p.Notes))
+                    {
+                        <h2 class="admin-detail-heading">Notes</h2>
+                        <p class="admin-notes">@p.Notes</p>
+                    }
+                </div>
+
+                <div class="admin-panel admin-detail mt-4">
+                    <h2 class="admin-detail-heading">API keys</h2>
+                    @if (p.ApiKeys.Count == 0)
+                    {
+                        <p class="admin-cell-sub">No keys yet. Generate one below.</p>
+                    }
+                    else
+                    {
+                        <div class="keys-list">
+                            @foreach (var k in p.ApiKeys)
+                            {
+                                <div class="key-row @(k.Revoked ? "is-revoked" : "")">
+                                    <div class="key-main">
+                                        <code class="key-prefix">@k.Prefix…</code>
+                                        <span class="key-label">@k.Label</span>
+                                        @if (k.Revoked)
+                                        {
+                                            <span class="status-chip status-chip--rejected">Revoked</span>
+                                        }
+                                    </div>
+                                    <div class="key-meta">
+                                        <span>@k.CallCount.ToString("N0") calls</span>
+                                        <span>@(k.LastUsedUtc is null ? "never used" : "last " + k.LastUsedUtc.Value.ToString("yyyy-MM-dd HH:mm"))</span>
+                                    </div>
+                                    @if (!k.Revoked)
+                                    {
+                                        <form method="post" asp-page-handler="RevokeKey" asp-route-id="@p.Id"
+                                              onsubmit="return confirm('Revoke this API key? Calls using it will stop working.');">
+                                            <input type="hidden" name="keyId" value="@k.Id" />
+                                            <button type="submit" class="admin-btn-mini">Revoke</button>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <form method="post" asp-page-handler="CreateKey" asp-route-id="@p.Id" class="key-create">
+                        <input type="text" name="label" class="form-control" placeholder="Key label (optional)" maxlength="40" />
+                        <button type="submit" class="btn admin-btn-primary">Generate key</button>
+                    </form>
+                </div>
+
+                <div class="admin-panel admin-detail mt-4">
+                    <h2 class="admin-detail-heading">Deliverable (worked-on files)</h2>
+                    @if (p.HasDeliverable)
+                    {
+                        <div class="key-row">
+                            <div class="key-main">
+                                <span class="key-label">⬇ @p.ResultFileName</span>
+                                <span class="admin-cell-sub">delivered @p.ResultUploadedUtc?.ToString("yyyy-MM-dd HH:mm") UTC</span>
+                            </div>
+                            <a asp-page-handler="DownloadResult" asp-route-id="@p.Id" class="admin-btn-mini">Download</a>
+                        </div>
+                        <p class="admin-cell-sub mt-2">Uploading again replaces the current deliverable.</p>
+                    }
+                    else
+                    {
+                        <p class="admin-cell-sub mb-3">No deliverable yet. Upload the finished bundle so the customer can download it.</p>
+                    }
+                    <form method="post" asp-page-handler="UploadResult" asp-route-id="@p.Id" enctype="multipart/form-data" class="key-create">
+                        <input type="file" name="ResultUpload" accept=".zip" class="form-control" required />
+                        <button type="submit" class="btn admin-btn-primary">Upload deliverable</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="admin-panel admin-actions">
+                    <h2 class="admin-detail-heading">Update status</h2>
+                    <p class="admin-cell-sub mb-3">Move this project through the deployment workflow.</p>
+                    <div class="admin-status-buttons">
+                        @foreach (var st in Enum.GetValues<DeploymentStatus>())
+                        {
+                            <form method="post" asp-page-handler="Status" asp-route-id="@p.Id">
+                                <input type="hidden" name="status" value="@st" />
+                                <button type="submit"
+                                        class="admin-status-option @st.ChipClass() @(p.Status == st ? "is-current" : "")"
+                                        disabled="@(p.Status == st)">
+                                    <span class="status-chip-dot">@st.Icon()</span>@st.Label()
+                                    @if (p.Status == st)
+                                    {
+                                        <span class="admin-status-now">Current</span>
+                                    }
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

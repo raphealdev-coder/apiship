@@ -26,6 +26,13 @@
                     <div><span>Live URL</span><strong>@Model.SiteUrl</strong></div>
                     <div><span>Status</span><strong class="status-building">Building…</strong></div>
                 </div>
+                @if (!string.IsNullOrEmpty(Model.NewApiKey))
+                {
+                    <div class="apikey-reveal">
+                        <span class="apikey-reveal-label">🔑 Your live API key — copy it now, it won't be shown again</span>
+                        <code class="apikey-reveal-value">@Model.NewApiKey</code>
+                    </div>
+                }
                 <p class="text-muted">A confirmation was sent to @Model.Input.Email. You can close this tab.</p>
                 <a asp-page="/Index" class="btn btn-outline-brand">Back to home</a>
             </div>
@@ -46,6 +53,7 @@
 
                 <div class="deploy-meta">
                     <div><span>Website name</span><strong>@Model.Input.WebsiteName</strong></div>
+                    <div><span>API type</span><strong>@apiship.Data.ApiProductCatalog.DisplayName(Model.Input.ApiType)</strong></div>
                     <div><span>Contact</span><strong>@Model.Input.FullName</strong></div>
                     <div><span>Email</span><strong>@Model.Input.Email</strong></div>
                     @if (!string.IsNullOrWhiteSpace(Model.Input.Domain))
@@ -63,6 +71,7 @@
                     <input type="hidden" asp-for="Input.WebsiteName" />
                     <input type="hidden" asp-for="Input.Domain" />
                     <input type="hidden" asp-for="Input.Plan" />
+                    <input type="hidden" asp-for="Input.ApiType" />
                     <input type="hidden" asp-for="Input.Notes" />
                     <input type="hidden" asp-for="PendingDeploymentId" />
                     <input type="hidden" asp-for="UploadedFileName" />
@@ -95,7 +104,24 @@
                         </div>
                         <span asp-validation-for="Input.Plan" class="text-danger"></span>
 
-                        <h3 class="form-step">2. Your details</h3>
+                        <h3 class="form-step">2. Choose your API type</h3>
+                        <div class="api-picker">
+                            @foreach (var api in apiship.Data.ApiProductCatalog.Products)
+                            {
+                                <label class="api-radio">
+                                    <input type="radio" asp-for="Input.ApiType" value="@api.Key"
+                                           checked="@(string.Equals(Model.Input.ApiType, api.Key, StringComparison.OrdinalIgnoreCase))" />
+                                    <span class="api-radio-body">
+                                        <span class="api-radio-icon">@api.Icon</span>
+                                        <span class="api-radio-name">@api.Name</span>
+                                        <span class="api-radio-summary">@api.Summary</span>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                        <span asp-validation-for="Input.ApiType" class="text-danger"></span>
+
+                        <h3 class="form-step">3. Your details</h3>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label asp-for="Input.FullName" class="form-label"></label>
@@ -109,7 +135,7 @@
                             </div>
                         </div>
 
-                        <h3 class="form-step">3. Your website</h3>
+                        <h3 class="form-step">4. Your website</h3>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label asp-for="Input.WebsiteName" class="form-label"></label>

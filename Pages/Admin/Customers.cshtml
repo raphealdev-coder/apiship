@@ -1,0 +1,119 @@
+@page
+@using apiship.Data
+@model apiship.Pages.Admin.CustomersModel
+@{
+    ViewData["Title"] = "Customers";
+    ViewData["ActiveNav"] = "customers";
+}
+
+<section class="admin-topbar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <span class="admin-logo-dot"></span>
+            <div>
+                <span class="admin-eyebrow">ApiShip · Admin</span>
+                <h1 class="admin-title">Customers</h1>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-page="/Admin/CustomerCreate" class="btn admin-btn-primary">+ New customer</a>
+            <form method="post" asp-page-handler="Logout" class="m-0">
+                <button type="submit" class="btn admin-btn-ghost">Log out</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<partial name="_AdminNav" />
+
+<section class="admin-body">
+    <div class="container">
+        <div class="admin-panel">
+            <form method="get" class="admin-toolbar">
+                <div class="admin-search">
+                    <span class="admin-search-icon">🔍</span>
+                    <input type="search" name="Search" value="@Model.Search" class="form-control"
+                           placeholder="Search name, email or company…" autocomplete="off" />
+                </div>
+                <button type="submit" class="btn admin-btn-primary">Search</button>
+                @if (!string.IsNullOrWhiteSpace(Model.Search))
+                {
+                    <a asp-page="/Admin/Customers" class="btn admin-btn-ghost">Clear</a>
+                }
+            </form>
+
+            @if (Model.MatchCount == 0)
+            {
+                <div class="admin-empty">
+                    <div class="admin-empty-icon">👥</div>
+                    <h3>No customers yet</h3>
+                    <p>Customers are created automatically when someone completes onboarding — or add one now.</p>
+                    <a asp-page="/Admin/CustomerCreate" class="btn admin-btn-primary mt-2">+ New customer</a>
+                </div>
+            }
+            else
+            {
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Projects</th>
+                                <th>Monthly spend</th>
+                                <th>Joined (UTC)</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Rows)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-page="/Admin/Customer" asp-route-id="@row.Customer.Id" class="admin-cell-title">@row.Customer.FullName</a>
+                                        <span class="admin-cell-sub">@row.Customer.Email</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-chip @row.Customer.Status.ChipClass()">@row.Customer.Status.Label()</span>
+                                    </td>
+                                    <td>@row.ProjectCount</td>
+                                    <td>$@row.MonthlySpend.ToString("N0")/mo</td>
+                                    <td class="admin-nowrap">@row.Customer.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="text-end">
+                                        <a asp-page="/Admin/Customer" asp-route-id="@row.Customer.Id" class="admin-btn-mini">View</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="admin-pager">
+                    <span class="admin-pager-info">@Model.MatchCount customer@(Model.MatchCount == 1 ? "" : "s")</span>
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav class="admin-pager-nav">
+                            @if (Model.PageNumber > 1)
+                            {
+                                <a asp-route-Search="@Model.Search" asp-route-PageNumber="@(Model.PageNumber - 1)" class="admin-page-btn">Prev</a>
+                            }
+                            else
+                            {
+                                <span class="admin-page-btn is-disabled">Prev</span>
+                            }
+                            <span class="admin-page-current">Page @Model.PageNumber of @Model.TotalPages</span>
+                            @if (Model.PageNumber < Model.TotalPages)
+                            {
+                                <a asp-route-Search="@Model.Search" asp-route-PageNumber="@(Model.PageNumber + 1)" class="admin-page-btn">Next</a>
+                            }
+                            else
+                            {
+                                <span class="admin-page-btn is-disabled">Next</span>
+                            }
+                        </nav>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>

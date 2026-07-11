@@ -20,3 +20,6 @@ SentEmails/
 # OS
 Thumbs.db
 .DS_Store
+
+# Database backups
+*.db.bak

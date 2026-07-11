@@ -1,0 +1,13 @@
+@{
+    var active = ViewData["ActiveNav"] as string ?? "";
+    string Tab(string key) => active == key ? "admin-tab is-active" : "admin-tab";
+}
+<nav class="admin-tabs">
+    <div class="container">
+        <a asp-page="/Admin/Index" class="@Tab("projects")">Projects</a>
+        <a asp-page="/Admin/Customers" class="@Tab("customers")">Customers</a>
+        <a asp-page="/Admin/Settings" class="@Tab("settings")">Settings</a>
+        <a href="/api/v1/health" target="_blank" rel="noopener" class="admin-tab admin-tab--ext">API ↗</a>
+    </div>
+</nav>
+<partial name="_AdminReminder" />

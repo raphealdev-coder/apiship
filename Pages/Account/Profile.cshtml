@@ -1,0 +1,140 @@
+@page
+@model apiship.Pages.Account.ProfileModel
+@{
+    ViewData["Title"] = "My details";
+}
+
+<section class="account-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <a asp-page="/Account/Index" class="account-back">← Dashboard</a>
+            <h1 class="mb-0">Account details</h1>
+        </div>
+        <form method="post" asp-page-handler="Logout" class="m-0">
+            <button type="submit" class="btn btn-outline-light">Log out</button>
+        </form>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="admin-flash mx-auto" style="max-width:640px;">@Model.StatusMessage</div>
+        }
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-6">
+                <div class="success-card" style="max-width:none;">
+                    <h3 class="text-start mb-3">Your details</h3>
+                    <form method="post" asp-page-handler="Details" class="onboard-form" novalidate>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Details.FullName" class="form-label"></label>
+                            <input asp-for="Details.FullName" class="form-control" autocomplete="name" />
+                            <span asp-validation-for="Details.FullName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Details.Email" class="form-label"></label>
+                            <input asp-for="Details.Email" class="form-control" autocomplete="email" />
+                            <span asp-validation-for="Details.Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Details.Company" class="form-label"></label>
+                            <input asp-for="Details.Company" class="form-control" autocomplete="organization" />
+                            <span asp-validation-for="Details.Company" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-brand w-100">Save details</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="success-card" style="max-width:none;">
+                    <h3 class="text-start mb-3">Change password</h3>
+                    @if (!string.IsNullOrEmpty(Model.PasswordError))
+                    {
+                        <div class="alert alert-danger">@Model.PasswordError</div>
+                    }
+                    <form method="post" asp-page-handler="Password" class="onboard-form" novalidate>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Password.CurrentPassword" class="form-label"></label>
+                            <input asp-for="Password.CurrentPassword" class="form-control" autocomplete="current-password" />
+                            <span asp-validation-for="Password.CurrentPassword" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Password.NewPassword" class="form-label"></label>
+                            <input asp-for="Password.NewPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="Password.NewPassword" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label asp-for="Password.ConfirmPassword" class="form-label"></label>
+                            <input asp-for="Password.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="Password.ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-outline-brand w-100">Update password</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-12">
+                <div class="success-card" style="max-width:none;">
+                    <h3 class="text-start mb-1">Billing details</h3>
+                    <p class="text-muted text-start mb-3">Used on your invoices and Paystack checkout.</p>
+                    <form method="post" asp-page-handler="Billing" class="onboard-form" novalidate>
+                        <div class="row g-3 text-start">
+                            <div class="col-md-6">
+                                <label asp-for="Billing.BillingName" class="form-label"></label>
+                                <input asp-for="Billing.BillingName" class="form-control" autocomplete="name" />
+                                <span asp-validation-for="Billing.BillingName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Billing.BillingEmail" class="form-label"></label>
+                                <input asp-for="Billing.BillingEmail" class="form-control" autocomplete="email" />
+                                <span asp-validation-for="Billing.BillingEmail" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Billing.AddressLine1" class="form-label"></label>
+                                <input asp-for="Billing.AddressLine1" class="form-control" autocomplete="address-line1" />
+                                <span asp-validation-for="Billing.AddressLine1" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Billing.AddressLine2" class="form-label"></label>
+                                <input asp-for="Billing.AddressLine2" class="form-control" autocomplete="address-line2" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Billing.City" class="form-label"></label>
+                                <input asp-for="Billing.City" class="form-control" autocomplete="address-level2" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Billing.State" class="form-label"></label>
+                                <input asp-for="Billing.State" class="form-control" autocomplete="address-level1" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Billing.PostalCode" class="form-label"></label>
+                                <input asp-for="Billing.PostalCode" class="form-control" autocomplete="postal-code" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Billing.Country" class="form-label"></label>
+                                <input asp-for="Billing.Country" class="form-control" autocomplete="country-name" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Billing.CardBrand" class="form-label"></label>
+                                <input asp-for="Billing.CardBrand" class="form-control" placeholder="Visa" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Billing.CardLast4" class="form-label"></label>
+                                <input asp-for="Billing.CardLast4" class="form-control" placeholder="4242" maxlength="4" inputmode="numeric" />
+                                <span asp-validation-for="Billing.CardLast4" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-brand mt-3">Save billing details</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

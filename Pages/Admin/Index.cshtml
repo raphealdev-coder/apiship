@@ -1,87 +1,229 @@
 @page
+@using apiship.Data
 @model apiship.Pages.Admin.IndexModel
 @{
-    ViewData["Title"] = "Admin dashboard";
+    ViewData["Title"] = "Projects";
+    ViewData["ActiveNav"] = "projects";
+
+    // Helper to build a query-string dictionary that preserves the active view
+    // while overriding one or more values (used by sort headers and paging).
+    Func<object, Dictionary<string, string?>> route = overrides =>
+    {
+        var d = new Dictionary<string, string?>
+        {
+            ["Search"] = Model.Search,
+            ["Status"] = Model.Status,
+            ["Plan"] = Model.Plan,
+            ["Sort"] = Model.Sort,
+            ["PageNumber"] = Model.PageNumber.ToString()
+        };
+        foreach (var p in overrides.GetType().GetProperties())
+        {
+            d[p.Name] = p.GetValue(overrides)?.ToString();
+        }
+        return d;
+    };
+
+    string SortLink(string key) => Model.Sort == key ? "admin-sort is-active" : "admin-sort";
 }
 
-<section class="onboard-hero" style="padding-bottom:2rem;">
-    <div class="container d-flex justify-content-between align-items-center flex-wrap">
-        <div class="text-start">
-            <span class="badge-pill">Admin</span>
-            <h1 class="mb-0">Submissions</h1>
+<section class="admin-topbar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <span class="admin-logo-dot"></span>
+            <div>
+                <span class="admin-eyebrow">ApiShip · Admin</span>
+                <h1 class="admin-title">Projects</h1>
+            </div>
         </div>
-        <form method="post" asp-page-handler="Logout" class="mt-3 mt-md-0">
-            <button type="submit" class="btn btn-outline-light">Log out</button>
-        </form>
+        <div class="d-flex align-items-center gap-3">
+            <div class="admin-user">
+                <span class="admin-avatar">@(string.IsNullOrEmpty(User.Identity?.Name) ? "?" : User.Identity!.Name!.Substring(0, 1).ToUpperInvariant())</span>
+                <div class="text-start d-none d-sm-block">
+                    <small class="admin-user-role">Signed in</small>
+                    <div class="admin-user-name">@User.Identity?.Name</div>
+                </div>
+            </div>
+            <form method="post" asp-page-handler="Logout">
+                <button type="submit" class="btn admin-btn-ghost">Log out</button>
+            </form>
+        </div>
     </div>
 </section>
 
-<section class="section">
+<partial name="_AdminNav" />
+
+<section class="admin-body">
     <div class="container">
-        <div class="row g-4 mb-4">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">📦</div>
-                    <h3>@Model.Submissions.Count</h3>
-                    <p>Total submissions</p>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-2">
+                <div class="stat-card">
+                    <span class="stat-label">Projects</span>
+                    <span class="stat-value">@Model.TotalProjects</span>
+                    <span class="stat-meta">Deployed sites</span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>$@Model.TotalRevenue<small class="text-muted">/mo</small></h3>
-                    <p>Recurring revenue</p>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card">
+                    <span class="stat-label">Customers</span>
+                    <span class="stat-value">@Model.TotalCustomers</span>
+                    <span class="stat-meta">Accounts</span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">👤</div>
-                    <h3>@User.Identity?.Name</h3>
-                    <p>Signed in as</p>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-label">Recurring revenue</span>
+                    <span class="stat-value">$@Model.TotalRevenue.ToString("N0")<small>/mo</small></span>
+                    <span class="stat-meta">Across all plans</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card">
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value stat-value--warn">@Model.PendingCount</span>
+                    <span class="stat-meta">Awaiting action</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-label">API calls</span>
+                    <span class="stat-value stat-value--ok">@Model.TotalApiCalls.ToString("N0")</span>
+                    <span class="stat-meta">All time</span>
                 </div>
             </div>
         </div>
 
-        @if (Model.Submissions.Count == 0)
-        {
-            <div class="success-card mx-auto text-center">
-                <h3>No submissions yet</h3>
-                <p class="text-muted">New sign-ups from the Get Started page will appear here.</p>
-            </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table align-middle admin-table">
-                    <thead>
-                        <tr>
-                            <th>Created (UTC)</th>
-                            <th>Website</th>
-                            <th>Plan</th>
-                            <th>Price</th>
-                            <th>Contact</th>
-                            <th>Email</th>
-                            <th>File</th>
-                            <th>Deployment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var s in Model.Submissions)
-                        {
+        <div class="admin-panel">
+            <form method="get" class="admin-toolbar">
+                <div class="admin-search">
+                    <span class="admin-search-icon">🔍</span>
+                    <input type="search" name="Search" value="@Model.Search" class="form-control"
+                           placeholder="Search project, customer, email or ID…" autocomplete="off" />
+                </div>
+                <select name="Status" class="form-select admin-filter" onchange="this.form.submit()">
+                    <option value="">All statuses</option>
+                    @foreach (var st in Enum.GetValues<DeploymentStatus>())
+                    {
+                        <option value="@st" selected="@(Model.Status == st.ToString())">@st.Label()</option>
+                    }
+                </select>
+                <select name="Plan" class="form-select admin-filter" onchange="this.form.submit()">
+                    <option value="">All plans</option>
+                    @foreach (var p in Model.PlanNames)
+                    {
+                        <option value="@p" selected="@(Model.Plan == p)">@p</option>
+                    }
+                </select>
+                <select name="Sort" class="form-select admin-filter" onchange="this.form.submit()">
+                    <option value="created_desc" selected="@(Model.Sort == "created_desc")">Newest first</option>
+                    <option value="created_asc" selected="@(Model.Sort == "created_asc")">Oldest first</option>
+                    <option value="price_desc" selected="@(Model.Sort == "price_desc")">Price: high to low</option>
+                    <option value="price_asc" selected="@(Model.Sort == "price_asc")">Price: low to high</option>
+                    <option value="name" selected="@(Model.Sort == "name")">Name A–Z</option>
+                    <option value="status" selected="@(Model.Sort == "status")">Status</option>
+                </select>
+                <button type="submit" class="btn admin-btn-primary">Apply</button>
+                @if (Model.HasFilters)
+                {
+                    <a asp-page="/Admin/Index" class="btn admin-btn-ghost">Clear</a>
+                }
+            </form>
+
+            @if (Model.MatchCount == 0)
+            {
+                <div class="admin-empty">
+                    <div class="admin-empty-icon">📭</div>
+                    <h3>@(Model.TotalProjects == 0 ? "No projects yet" : "No matches")</h3>
+                    <p>
+                        @(Model.TotalProjects == 0
+                            ? "New sign-ups from the Get Started page will appear here."
+                            : "Try adjusting your search or filters.")
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
                             <tr>
-                                <td>@s.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                                <td><strong>@s.WebsiteName</strong><br /><small class="text-muted">@s.SiteUrl</small></td>
-                                <td>@s.Plan</td>
-                                <td>$@s.Price</td>
-                                <td>@s.FullName</td>
-                                <td>@s.Email</td>
-                                <td><small>@s.UploadFileName</small></td>
-                                <td><small>@s.DeploymentId</small></td>
+                                <th><a asp-all-route-data="@route(new { Sort = "name", PageNumber = 1 })" class="@SortLink("name")">Project</a></th>
+                                <th>Customer</th>
+                                <th><a asp-all-route-data="@route(new { Sort = "price_desc", PageNumber = 1 })" class="@SortLink("price_desc")">Plan</a></th>
+                                <th><a asp-all-route-data="@route(new { Sort = "status", PageNumber = 1 })" class="@SortLink("status")">Status</a></th>
+                                <th><a asp-all-route-data="@route(new { Sort = "created_desc", PageNumber = 1 })" class="@SortLink("created_desc")">Created (UTC)</a></th>
+                                <th class="text-end">Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.Projects)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-page="/Admin/Details" asp-route-id="@p.Id" class="admin-cell-title">@p.Name</a>
+                                        <span class="admin-cell-sub">@p.SiteUrl</span>
+                                    </td>
+                                    <td>
+                                        <span class="admin-cell-title">@p.Customer?.FullName</span>
+                                        <span class="admin-cell-sub">@p.Customer?.Email</span>
+                                    </td>
+                                    <td>
+                                        <span class="admin-plan">@p.Plan</span>
+                                        <span class="admin-cell-sub">$@p.Price/mo</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-chip @p.Status.ChipClass()">
+                                            <span class="status-chip-dot">@p.Status.Icon()</span>@p.Status.Label()
+                                        </span>
+                                    </td>
+                                    <td class="admin-nowrap">@p.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="text-end">
+                                        <div class="admin-row-actions">
+                                            @if (p.Status != DeploymentStatus.Deployed)
+                                            {
+                                                <form method="post" asp-page-handler="Status" asp-all-route-data="@route(new { })">
+                                                    <input type="hidden" name="id" value="@p.Id" />
+                                                    <input type="hidden" name="status" value="@DeploymentStatus.Deployed" />
+                                                    <button type="submit" class="admin-btn-mini admin-btn-mini--ok" title="Mark deployed">Deploy</button>
+                                                </form>
+                                            }
+                                            <a asp-page="/Admin/Details" asp-route-id="@p.Id" class="admin-btn-mini">View</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="admin-pager">
+                    <span class="admin-pager-info">
+                        Showing @((Model.PageNumber - 1) * 10 + 1)–@(Math.Min(Model.PageNumber * 10, Model.MatchCount)) of @Model.MatchCount
+                    </span>
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav class="admin-pager-nav">
+                            @if (Model.PageNumber > 1)
+                            {
+                                <a asp-all-route-data="@route(new { PageNumber = Model.PageNumber - 1 })" class="admin-page-btn">Prev</a>
+                            }
+                            else
+                            {
+                                <span class="admin-page-btn is-disabled">Prev</span>
+                            }
+                            <span class="admin-page-current">Page @Model.PageNumber of @Model.TotalPages</span>
+                            @if (Model.PageNumber < Model.TotalPages)
+                            {
+                                <a asp-all-route-data="@route(new { PageNumber = Model.PageNumber + 1 })" class="admin-page-btn">Next</a>
+                            }
+                            else
+                            {
+                                <span class="admin-page-btn is-disabled">Next</span>
+                            }
+                        </nav>
+                    }
+                </div>
+            }
+        </div>
     </div>
 </section>

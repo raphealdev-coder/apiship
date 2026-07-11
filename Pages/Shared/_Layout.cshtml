@@ -23,10 +23,20 @@
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-end">
                     <ul class="navbar-nav align-items-lg-center">
                         <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/#apis">APIs</a></li>
                         <li class="nav-item"><a class="nav-link" href="/#analytics">Analytics</a></li>
                         <li class="nav-item"><a class="nav-link" href="/#reviews">Reviews</a></li>
                         <li class="nav-item"><a class="nav-link" href="/#pricing">Pricing</a></li>
-                        <li class="nav-item ms-lg-3"><a class="btn btn-brand btn-sm" asp-page="/GetStarted">Get started</a></li>
+                        @if (User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Account/Index">My account</a></li>
+                            <li class="nav-item ms-lg-3"><a class="btn btn-brand btn-sm" asp-page="/GetStarted">Get started</a></li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Account/Login">Sign in</a></li>
+                            <li class="nav-item ms-lg-3"><a class="btn btn-brand btn-sm" asp-page="/GetStarted">Get started</a></li>
+                        }
                     </ul>
                 </div>
             </div>

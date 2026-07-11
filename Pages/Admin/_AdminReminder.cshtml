@@ -1,0 +1,19 @@
+@using apiship.Services
+@inject IAppSettingsService Settings
+@{
+    var s = await Settings.GetAsync();
+}
+@if (s.ReminderEnabled)
+{
+    var defaultMsg = "Keep your subscription active to avoid synchronisation errors between stores.";
+    var expiry = s.ReminderExpiryUtc?.ToString("d MMMM yyyy");
+    <div class="admin-reminder">
+        <div class="container d-flex align-items-start gap-2">
+            <span class="admin-reminder-icon">⚠️</span>
+            <div>
+                <strong>Trial connector expiring@(expiry is null ? "" : $" on {expiry}").</strong>
+                <span>@(string.IsNullOrWhiteSpace(s.ReminderMessage) ? defaultMsg : s.ReminderMessage)</span>
+            </div>
+        </div>
+    </div>
+}

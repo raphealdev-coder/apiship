@@ -3,6 +3,7 @@ using apiship.Data;
 using apiship.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace apiship.Pages;
 
@@ -11,6 +12,7 @@ public class GetStartedModel : PageModel
     private readonly IWebHostEnvironment _env;
     private readonly AppDbContext _db;
     private readonly IEmailSender _email;
+    private readonly IApiKeyGenerator _keys;
     private readonly ILogger<GetStartedModel> _logger;
 
     // Allowed website bundle formats and max upload size (25 MB).
@@ -18,21 +20,17 @@ public class GetStartedModel : PageModel
     private const long MaxFileBytes = 25 * 1024 * 1024;
 
     public GetStartedModel(IWebHostEnvironment env, AppDbContext db, IEmailSender email,
-        ILogger<GetStartedModel> logger)
+        IApiKeyGenerator keys, ILogger<GetStartedModel> logger)
     {
         _env = env;
         _db = db;
         _email = email;
+        _keys = keys;
         _logger = logger;
     }
 
-    // Available plans (name -> monthly price).
-    public static readonly IReadOnlyList<PlanOption> Plans = new List<PlanOption>
-    {
-        new("Starter", 50, "100k API calls / month · 3 endpoints"),
-        new("Growth", 120, "2M API calls / month · unlimited endpoints"),
-        new("Scale", 300, "20M API calls / month · 99.99% SLA")
-    };
+    // Available plans come from the shared catalog.
+    public static IReadOnlyList<PlanOption> Plans => PlanCatalog.Plans;
 
     [BindProperty]
     public OnboardingInput Input { get; set; } = new();
@@ -49,6 +47,9 @@ public class GetStartedModel : PageModel
 
     public Stage CurrentStage { get; private set; } = Stage.Form;
     public string? SiteUrl { get; private set; }
+
+    // The freshly generated API key, shown exactly once on the success screen.
+    public string? NewApiKey { get; private set; }
 
     public enum Stage { Form, Review, Done }
 
@@ -132,37 +133,61 @@ public class GetStartedModel : PageModel
         var slug = Slugify(Input.WebsiteName);
         SiteUrl = $"https://{slug}.apiship.app";
 
-        var submission = new Submission
+        // Upsert the customer by email, then create the project + first API key.
+        var email = Input.Email.Trim();
+        var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Email == email);
+        if (customer is null)
         {
-            DeploymentId = PendingDeploymentId,
-            FullName = Input.FullName,
-            Email = Input.Email,
-            WebsiteName = Input.WebsiteName,
+            customer = new Customer { FullName = Input.FullName, Email = email };
+            _db.Customers.Add(customer);
+        }
+        else
+        {
+            customer.FullName = Input.FullName;
+        }
+
+        var (fullKey, prefix, hash) = _keys.Create("live");
+
+        var now = DateTime.UtcNow;
+        var trialEnds = now.AddDays(14);
+        var project = new Project
+        {
+            Customer = customer,
+            Name = Input.WebsiteName,
             Domain = Input.Domain,
             Plan = SelectedPlan.Name,
             Price = SelectedPlan.Price,
             Notes = Input.Notes,
+            ApiType = ApiProductCatalog.Find(Input.ApiType)?.Key ?? "inventory",
             UploadFileName = UploadedFileName ?? string.Empty,
+            DeploymentId = PendingDeploymentId,
             SiteUrl = SiteUrl,
-            CreatedUtc = DateTime.UtcNow
+            Status = DeploymentStatus.Pending,
+            CreatedUtc = now,
+            TrialEndsUtc = trialEnds,
+            NextBillingUtc = trialEnds
         };
+        project.ApiKeys.Add(new ApiKey { Label = "Default", Prefix = prefix, SecretHash = hash });
 
-        _db.Submissions.Add(submission);
+        _db.Projects.Add(project);
         await _db.SaveChangesAsync();
+
+        NewApiKey = fullKey;
 
         var body = $@"<h2>Welcome to ApiShip, {System.Net.WebUtility.HtmlEncode(Input.FullName)}!</h2>
 <p>Your website <strong>{System.Net.WebUtility.HtmlEncode(Input.WebsiteName)}</strong> is queued for deployment
 on the <strong>{SelectedPlan.Name}</strong> plan (${SelectedPlan.Price}/mo).</p>
 <ul>
-  <li>Deployment ID: {submission.DeploymentId}</li>
+  <li>Deployment ID: {project.DeploymentId}</li>
   <li>Live URL: {SiteUrl}</li>
+  <li>API key (store it securely): {fullKey}</li>
 </ul>
 <p>We'll email you again when your site is live.</p>";
 
         await _email.SendAsync(Input.Email, "Your ApiShip deployment is starting", body);
 
-        _logger.LogInformation("Submission {DeploymentId} saved for {Website} on {Plan}.",
-            submission.DeploymentId, Input.WebsiteName, SelectedPlan.Name);
+        _logger.LogInformation("Project {DeploymentId} created for customer {Email} on {Plan}.",
+            project.DeploymentId, email, SelectedPlan.Name);
 
         CurrentStage = Stage.Done;
         return Page();
@@ -181,8 +206,6 @@ on the <strong>{SelectedPlan.Name}</strong> plan (${SelectedPlan.Price}/mo).</p>
         return string.IsNullOrEmpty(slug) ? "my-site" : slug;
     }
 }
-
-public record PlanOption(string Name, int Price, string Summary);
 
 public class OnboardingInput
 {
@@ -204,6 +227,10 @@ public class OnboardingInput
 
     [Required]
     public string Plan { get; set; } = "Starter";
+
+    [Required]
+    [Display(Name = "API type")]
+    public string ApiType { get; set; } = "inventory";
 
     [StringLength(500)]
     public string? Notes { get; set; }

@@ -1,0 +1,54 @@
+@page
+@model apiship.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Create your account";
+}
+
+<section class="onboard-hero">
+    <div class="container text-center">
+        <span class="badge-pill">Free account</span>
+        <h1>Create your account</h1>
+        <p>Sign up to track your deployments and download your finished files.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="success-card mx-auto" style="max-width:460px;">
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+            <form method="post" class="onboard-form" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.FullName" class="form-label"></label>
+                    <input asp-for="Input.FullName" class="form-control" autocomplete="name" placeholder="Jane Doe" />
+                    <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                </div>
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Email" class="form-label"></label>
+                    <input asp-for="Input.Email" class="form-control" autocomplete="email" placeholder="jane@company.com" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    <small class="text-muted">At least 8 characters.</small>
+                </div>
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-brand btn-lg w-100">Create account</button>
+            </form>
+            <p class="text-muted mt-3 mb-0">Already have an account? <a asp-page="/Account/Login">Sign in</a></p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

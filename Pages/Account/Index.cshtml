@@ -1,0 +1,103 @@
+@page
+@using apiship.Data
+@model apiship.Pages.Account.IndexModel
+@{
+    ViewData["Title"] = "My dashboard";
+    var c = Model.Customer;
+}
+
+<section class="account-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-pill">Dashboard</span>
+            <h1 class="mb-0">Welcome, @c.FullName</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-page="/Account/Billing" class="btn btn-outline-light">Subscription</a>
+            <a asp-page="/Account/Profile" class="btn btn-outline-light">Edit details</a>
+            <a asp-page="/GetStarted" class="btn btn-brand">New project</a>
+            <form method="post" asp-page-handler="Logout" class="m-0">
+                <button type="submit" class="btn btn-outline-light">Log out</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <h2 class="account-section-title">Your projects</h2>
+
+        @if (Model.Projects.Count == 0)
+        {
+            <div class="success-card mx-auto text-center">
+                <div class="success-icon">🚀</div>
+                <h3>No projects yet</h3>
+                <p class="text-muted">Start your first deployment and it will show up here.</p>
+                <a asp-page="/GetStarted" class="btn btn-brand">Start a project</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var p in Model.Projects)
+                {
+                    <div class="col-md-6">
+                        <div class="account-project">
+                            <div class="account-project-head">
+                                <div>
+                                    <h3>@p.Name</h3>
+                                    <a href="@p.SiteUrl" target="_blank" rel="noopener" class="account-project-url">@p.SiteUrl</a>
+                                </div>
+                                <span class="status-chip @p.Status.ChipClass()">
+                                    <span class="status-chip-dot">@p.Status.Icon()</span>@p.Status.Label()
+                                </span>
+                            </div>
+
+                            <dl class="account-project-meta">
+                                <div><dt>Plan</dt><dd>@p.Plan · $@p.Price/mo</dd></div>
+                                <div><dt>API type</dt><dd>@apiship.Data.ApiProductCatalog.DisplayName(p.ApiType)</dd></div>
+                                <div>
+                                    <dt>Subscription</dt>
+                                    <dd>
+                                        @if (p.IsSubscribed)
+                                        {
+                                            <span class="text-success">Active · next @p.NextBillingUtc.ToString("yyyy-MM-dd")</span>
+                                        }
+                                        else if (p.IsInTrial)
+                                        {
+                                            <span class="text-warning-emphasis">Trial · @p.TrialDaysLeft day@(p.TrialDaysLeft == 1 ? "" : "s") left</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Expired</span>
+                                        }
+                                    </dd>
+                                </div>
+                                <div><dt>Deployment ID</dt><dd><code>@p.DeploymentId</code></dd></div>
+                            </dl>
+
+                            <div class="account-project-deliverable">
+                                @if (p.HasDeliverable)
+                                {
+                                    <a asp-page-handler="Download" asp-route-projectId="@p.Id" class="btn btn-brand w-100">
+                                        ⬇ Download your files
+                                    </a>
+                                    <small class="text-muted d-block mt-2">
+                                        Delivered @p.ResultUploadedUtc?.ToString("yyyy-MM-dd HH:mm") UTC
+                                    </small>
+                                }
+                                else
+                                {
+                                    <div class="account-pending">
+                                        <span class="account-pending-dot"></span>
+                                        We're still working on your files. You'll be able to download them here once ready.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
