@@ -68,6 +68,58 @@ public class DetailsModel : PageModel
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostBillingAsync(int id, string? plan, BillingCycle cycle,
+        DateTime? trialEnds, int monthsPaid, bool subscribed)
+    {
+        var project = await _db.Projects.FindAsync(id);
+        if (project is null)
+        {
+            return NotFound();
+        }
+
+        // Plan chosen at signup can be corrected/changed here; keep price in sync.
+        var planOption = PlanCatalog.Find(plan);
+        if (planOption is not null)
+        {
+            project.Plan = planOption.Name;
+            project.Price = planOption.Price;
+        }
+
+        project.BillingCycle = cycle;
+
+        if (trialEnds is not null)
+        {
+            project.TrialEndsUtc = DateTime.SpecifyKind(trialEnds.Value, DateTimeKind.Utc);
+        }
+
+        var now = DateTime.UtcNow;
+        if (monthsPaid > 0)
+        {
+            // Extend from the current paid-through date if still active, otherwise from now.
+            var basis = project.IsSubscribed && project.NextBillingUtc > now ? project.NextBillingUtc : now;
+            project.NextBillingUtc = basis.AddMonths(monthsPaid);
+            project.IsSubscribed = true;
+            project.SubscribedUtc ??= now;
+            project.PlanChangedUtc = now;
+        }
+        else
+        {
+            project.IsSubscribed = subscribed;
+            if (!subscribed)
+            {
+                project.SubscribedUtc = null;
+            }
+        }
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Billing updated for project {DeploymentId} by {User} (plan {Plan}, +{Months}mo).",
+            project.DeploymentId, User.Identity?.Name, project.Plan, monthsPaid);
+
+        StatusMessage = "Subscription & billing updated.";
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostCreateKeyAsync(int id, string? label)
     {
         var project = await _db.Projects.FindAsync(id);

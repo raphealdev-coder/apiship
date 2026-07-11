@@ -157,6 +157,73 @@
                         <button type="submit" class="btn admin-btn-primary">Upload deliverable</button>
                     </form>
                 </div>
+
+                <div class="admin-panel admin-detail mt-4">
+                    <h2 class="admin-detail-heading">Subscription &amp; billing</h2>
+                    <dl class="admin-detail-grid">
+                        <dt>Subscription</dt>
+                        <dd>
+                            @if (p.IsSubscribed)
+                            {
+                                <span class="status-chip status-chip--deployed">Active</span>
+                            }
+                            else if (p.IsInTrial)
+                            {
+                                <span class="status-chip status-chip--pending">Trial · @p.TrialDaysLeft day(s) left</span>
+                            }
+                            else
+                            {
+                                <span class="status-chip status-chip--rejected">Expired</span>
+                            }
+                        </dd>
+                        <dt>Trial ends</dt>
+                        <dd>@(p.TrialEndsUtc.Year > 2000 ? p.TrialEndsUtc.ToString("yyyy-MM-dd") : "—")</dd>
+                        <dt>Next billing</dt>
+                        <dd>@(p.NextBillingUtc.Year > 2000 ? p.NextBillingUtc.ToString("yyyy-MM-dd") : "—")</dd>
+                        <dt>Billing cycle</dt>
+                        <dd>@p.BillingCycle</dd>
+                    </dl>
+
+                    <form method="post" asp-page-handler="Billing" asp-route-id="@p.Id" class="onboard-form mt-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="admin-field-label">Plan (chosen at signup)</label>
+                                <select name="plan" class="form-select">
+                                    @foreach (var pl in apiship.Data.PlanCatalog.Plans)
+                                    {
+                                        <option value="@pl.Name" selected="@(string.Equals(p.Plan, pl.Name, StringComparison.OrdinalIgnoreCase))">@pl.Name — $@pl.Price/mo</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="admin-field-label">Billing cycle</label>
+                                <select name="cycle" class="form-select">
+                                    @foreach (var c in Enum.GetValues<BillingCycle>())
+                                    {
+                                        <option value="@c" selected="@(p.BillingCycle == c)">@c</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="admin-field-label">Trial expiry date</label>
+                                <input type="date" name="trialEnds" class="form-control"
+                                       value="@(p.TrialEndsUtc.Year > 2000 ? p.TrialEndsUtc.ToString("yyyy-MM-dd") : "")" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="admin-field-label">Months paid</label>
+                                <input type="number" name="monthsPaid" min="0" max="120" value="0" class="form-control" />
+                                <small class="text-muted">Enter months to activate/extend the subscription (adds to the paid-through date).</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="admin-check">
+                                    <input type="checkbox" name="subscribed" value="true" @(p.IsSubscribed ? "checked" : "") />
+                                    <span>Subscription active (used only when months paid is 0)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn admin-btn-primary mt-3">Save subscription</button>
+                    </form>
+                </div>
             </div>
 
             <div class="col-lg-4">
