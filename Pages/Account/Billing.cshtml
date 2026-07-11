@@ -110,7 +110,7 @@
                                     }
                                 </td>
                                 <td class="text-end sub-fee">
-                                    $@Model.PriceMonthlyUsd <small>/ mo</small>
+                                    <span class="js-fee-amt">$@Model.PriceMonthlyUsd</span> <small class="js-fee-per">/ mo</small>
                                 </td>
                             </tr>
                         }
@@ -141,15 +141,15 @@
 
                     <div class="sub-plan-foot">
                         <div>
-                            <div class="sub-total">
+                            <div class="sub-total" id="subTotal">
                                 @Model.StoreCount store@(Model.StoreCount == 1 ? "" : "s") × $@Model.PriceMonthlyUsd =
                                 <strong>$@Model.MonthlyTotalUsd</strong> / month
                             </div>
-                            <div class="sub-total-ngn">
+                            <div class="sub-total-ngn" id="subTotalNgn">
                                 Charged in Naira: ₦@monthlyNgn.ToString("N0") (at ₦@Model.Rate.ToString("N0")/$)
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-brand btn-lg">Pay &amp; subscribe — $@Model.MonthlyTotalUsd/month</button>
+                        <button type="submit" id="subBtn" class="btn btn-brand btn-lg">Pay &amp; subscribe — $@Model.MonthlyTotalUsd/month</button>
                     </div>
                     <p class="sub-note">
                         Prices are in US dollars; you'll be charged the equivalent in Naira at today's rate on Paystack's
@@ -171,5 +171,51 @@
                 setTimeout(function () { btn.textContent = old; }, 1200);
             });
         }
+
+        (function () {
+            var b = {
+                stores: @Model.StoreCount,
+                monthlyPer: @Model.PriceMonthlyUsd,
+                yearlyPer: @Model.PriceYearlyUsd,
+                monthlyTotal: @Model.MonthlyTotalUsd,
+                yearlyTotal: @Model.YearlyTotalUsd,
+                monthlyNgn: @Model.NgnFor(Model.MonthlyTotalUsd),
+                yearlyNgn: @Model.NgnFor(Model.YearlyTotalUsd),
+                rate: @Model.Rate.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            };
+            function fmt(n) { return Number(n).toLocaleString('en-US'); }
+            var checked = function () {
+                var el = document.querySelector('input[name=cycle]:checked');
+                return el ? el.value : 'monthly';
+            };
+            function update() {
+                var yearly = checked() === 'yearly';
+                var per = yearly ? b.yearlyPer : b.monthlyPer;
+                var total = yearly ? b.yearlyTotal : b.monthlyTotal;
+                var ngn = yearly ? b.yearlyNgn : b.monthlyNgn;
+                var period = yearly ? 'year' : 'month';
+                var perLabel = yearly ? '/ yr' : '/ mo';
+
+                var totalEl = document.getElementById('subTotal');
+                if (totalEl) {
+                    totalEl.innerHTML = b.stores + ' store' + (b.stores === 1 ? '' : 's') +
+                        ' × $' + fmt(per) + ' = <strong>$' + fmt(total) + '</strong> / ' + period;
+                }
+                var ngnEl = document.getElementById('subTotalNgn');
+                if (ngnEl) {
+                    ngnEl.textContent = 'Charged in Naira: ₦' + fmt(ngn) + ' (at ₦' + fmt(b.rate) + '/$)';
+                }
+                var btn = document.getElementById('subBtn');
+                if (btn) {
+                    btn.textContent = 'Pay & subscribe — $' + fmt(total) + '/' + period;
+                }
+                document.querySelectorAll('.js-fee-amt').forEach(function (el) { el.textContent = '$' + fmt(per); });
+                document.querySelectorAll('.js-fee-per').forEach(function (el) { el.textContent = perLabel; });
+            }
+            document.querySelectorAll('input[name=cycle]').forEach(function (r) {
+                r.addEventListener('change', update);
+            });
+            update();
+        })();
     </script>
 }
