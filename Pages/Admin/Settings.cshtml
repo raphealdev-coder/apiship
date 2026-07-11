@@ -70,15 +70,15 @@
 
         <div class="admin-panel admin-detail">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h2 class="admin-detail-heading mb-0" style="border:0;">Backend reminder banner</h2>
-                <span class="text-muted small">Shows to all staff · edited here only</span>
+                <h2 class="admin-detail-heading mb-0" style="border:0;">Customer account reminder banner</h2>
+                <span class="text-muted small">Shows to customers · edited here only</span>
             </div>
             <hr class="settings-rule" />
 
             <form method="post" asp-page-handler="Reminder" class="onboard-form">
                 <label class="admin-check mb-3">
                     <input asp-for="Reminder.Enabled" type="checkbox" />
-                    <span>Show the amber “trial connector expiring” reminder across the staff backend</span>
+                    <span>Show the amber “trial connector expiring” reminder across the customer account</span>
                 </label>
                 <div class="mb-3">
                     <label class="admin-field-label">Expiry date</label>

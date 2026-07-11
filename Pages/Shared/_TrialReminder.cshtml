@@ -7,9 +7,9 @@
 {
     var defaultMsg = "Keep your subscription active to avoid synchronisation errors between stores.";
     var expiry = s.ReminderExpiryUtc?.ToString("d MMMM yyyy");
-    <div class="admin-reminder">
+    <div class="account-reminder">
         <div class="container d-flex align-items-start gap-2">
-            <span class="admin-reminder-icon">⚠️</span>
+            <span class="account-reminder-icon">⚠️</span>
             <div>
                 <strong>Trial connector expiring@(expiry is null ? "" : $" on {expiry}").</strong>
                 <span>@(string.IsNullOrWhiteSpace(s.ReminderMessage) ? defaultMsg : s.ReminderMessage)</span>

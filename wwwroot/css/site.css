@@ -2126,3 +2126,15 @@ a.admin-cell-title:hover { color: var(--brand); }
 
 .admin-reminder-icon { font-size: 1.1rem; }
 .admin-reminder strong { margin-right: .3rem; }
+
+/* Customer account reminder banner */
+.account-reminder {
+    background: #fef9e7;
+    border-bottom: 1px solid #f6e6a8;
+    color: #92500e;
+    padding: .9rem 0;
+    font-size: .92rem;
+}
+
+.account-reminder-icon { font-size: 1.1rem; }
+.account-reminder strong { margin-right: .3rem; }
