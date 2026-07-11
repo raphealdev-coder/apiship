@@ -16,6 +16,9 @@ public class Project
     public string SiteUrl { get; set; } = string.Empty;
     public string DeploymentId { get; set; } = string.Empty;
 
+    // Optional store location/branch (e.g. "Ikeja Lagos"), shown under the store name.
+    public string? Location { get; set; }
+
     public string Plan { get; set; } = string.Empty;
     public int Price { get; set; }
     public string? Notes { get; set; }

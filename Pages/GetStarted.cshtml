@@ -69,6 +69,7 @@
                     <input type="hidden" asp-for="Input.FullName" />
                     <input type="hidden" asp-for="Input.Email" />
                     <input type="hidden" asp-for="Input.WebsiteName" />
+                    <input type="hidden" asp-for="Input.Location" />
                     <input type="hidden" asp-for="Input.Domain" />
                     <input type="hidden" asp-for="Input.Plan" />
                     <input type="hidden" asp-for="Input.ApiType" />
@@ -141,6 +142,11 @@
                                 <label asp-for="Input.WebsiteName" class="form-label"></label>
                                 <input asp-for="Input.WebsiteName" class="form-control" placeholder="My Awesome Site" />
                                 <span asp-validation-for="Input.WebsiteName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Location" class="form-label"></label>
+                                <input asp-for="Input.Location" class="form-control" placeholder="Ikeja Lagos" />
+                                <span asp-validation-for="Input.Location" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="Input.Domain" class="form-label"></label>

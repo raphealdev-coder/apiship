@@ -82,7 +82,7 @@
                             <tr>
                                 <td>
                                     <span class="sub-store">@p.Name</span>
-                                    <span class="admin-cell-sub">@ApiProductCatalog.DisplayName(p.ApiType)</span>
+                                    <span class="admin-cell-sub">@(string.IsNullOrWhiteSpace(p.Location) ? ApiProductCatalog.DisplayName(p.ApiType) : p.Location)</span>
                                 </td>
                                 <td>
                                     @if (key is not null)

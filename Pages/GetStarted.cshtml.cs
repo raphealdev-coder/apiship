@@ -159,6 +159,7 @@ public class GetStartedModel : PageModel
             Price = SelectedPlan.Price,
             Notes = Input.Notes,
             ApiType = ApiProductCatalog.Find(Input.ApiType)?.Key ?? "inventory",
+            Location = string.IsNullOrWhiteSpace(Input.Location) ? null : Input.Location.Trim(),
             UploadFileName = UploadedFileName ?? string.Empty,
             DeploymentId = PendingDeploymentId,
             SiteUrl = SiteUrl,
@@ -220,6 +221,10 @@ public class OnboardingInput
     [Required, StringLength(60, MinimumLength = 2)]
     [Display(Name = "Website name")]
     public string WebsiteName { get; set; } = string.Empty;
+
+    [StringLength(80)]
+    [Display(Name = "Store location (optional)")]
+    public string? Location { get; set; }
 
     [Url]
     [Display(Name = "Existing domain (optional)")]
