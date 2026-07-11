@@ -14,6 +14,7 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             <a asp-page="/Account/Billing" class="btn btn-outline-light">Subscription</a>
+            <a asp-page="/Account/AddStore" class="btn btn-outline-light">Add store</a>
             <a asp-page="/Account/Profile" class="btn btn-outline-light">Edit details</a>
             <a asp-page="/GetStarted" class="btn btn-brand">New project</a>
             <form method="post" asp-page-handler="Logout" class="m-0">
@@ -56,7 +57,7 @@
                             </div>
 
                             <dl class="account-project-meta">
-                                <div><dt>Plan</dt><dd>@p.Plan · $@p.Price/mo</dd></div>
+                                <div><dt>Plan</dt><dd>@p.Plan · $@p.Price/@(p.BillingCycle == apiship.Data.BillingCycle.Yearly ? "yr" : "mo")</dd></div>
                                 <div><dt>API type</dt><dd>@apiship.Data.ApiProductCatalog.DisplayName(p.ApiType)</dd></div>
                                 <div>
                                     <dt>Subscription</dt>

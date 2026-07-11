@@ -1,0 +1,68 @@
+@page
+@using apiship.Data
+@model apiship.Pages.Account.AddStoreModel
+@{
+    ViewData["Title"] = "Add a store";
+}
+
+<section class="account-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <a asp-page="/Account/Billing" class="account-back">← Subscription</a>
+            <h1 class="mb-0">Add a store</h1>
+        </div>
+        <form method="post" asp-page-handler="Logout" class="m-0">
+            <button type="submit" class="btn btn-outline-light">Log out</button>
+        </form>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container" style="max-width:640px;">
+        <div class="success-card" style="max-width:none;">
+            <p class="text-muted text-start mb-3">
+                Each store you add starts on a 14‑day trial and is billed per store on your next payment.
+            </p>
+            <form method="post" class="onboard-form" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="row g-3 text-start">
+                    <div class="col-md-6">
+                        <label asp-for="Input.Name" class="form-label"></label>
+                        <input asp-for="Input.Name" class="form-control" placeholder="Lekki" />
+                        <span asp-validation-for="Input.Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.Location" class="form-label"></label>
+                        <input asp-for="Input.Location" class="form-control" placeholder="Lekki Lagos" />
+                        <span asp-validation-for="Input.Location" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">API type</label>
+                        <div class="api-picker">
+                            @foreach (var api in ApiProductCatalog.Products)
+                            {
+                                <label class="api-radio">
+                                    <input type="radio" asp-for="Input.ApiType" value="@api.Key"
+                                           checked="@(string.Equals(Model.Input.ApiType, api.Key, StringComparison.OrdinalIgnoreCase))" />
+                                    <span class="api-radio-body">
+                                        <span class="api-radio-icon">@api.Icon</span>
+                                        <span class="api-radio-name">@api.Name</span>
+                                        <span class="api-radio-summary">@api.Summary</span>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-brand btn-lg">Add store</button>
+                    <a asp-page="/Account/Billing" class="btn btn-outline-brand btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

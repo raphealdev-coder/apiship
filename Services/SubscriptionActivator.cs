@@ -33,12 +33,19 @@ public static class SubscriptionActivator
         var now = DateTime.UtcNow;
         var nextBilling = payment.Cycle == BillingCycle.Yearly ? now.AddYears(1) : now.AddMonths(1);
 
+        // Per-store price for the chosen cycle, from the current admin settings.
+        var settings = await db.AppSettings.FirstOrDefaultAsync(s => s.Id == 1);
+        var perStorePrice = payment.Cycle == BillingCycle.Yearly
+            ? (settings?.PriceYearlyUsd ?? 550)
+            : (settings?.PriceMonthlyUsd ?? 50);
+
         foreach (var project in payment.Customer!.Projects)
         {
             project.IsSubscribed = true;
             project.SubscribedUtc = now;
             project.BillingCycle = payment.Cycle;
             project.NextBillingUtc = nextBilling;
+            project.Price = perStorePrice;
         }
 
         await db.SaveChangesAsync();

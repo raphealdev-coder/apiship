@@ -14,6 +14,7 @@
             <h1 class="mb-0">Store Sync &amp; API Connector</h1>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <a asp-page="/Account/AddStore" class="btn btn-brand">+ Add store</a>
             <a asp-page="/Account/Profile" class="btn btn-outline-light">Billing details</a>
             <form method="post" asp-page-handler="Logout" class="m-0">
                 <button type="submit" class="btn btn-outline-light">Log out</button>
@@ -120,8 +121,9 @@
 
             @if (!Model.AllSubscribed)
             {
-                <form method="post" asp-page-handler="Subscribe" class="sub-plan-card">
+                <form method="post" asp-page-handler="Subscribe" id="subscribeForm" class="sub-plan-card">
                     <h3 class="sub-plan-title">Choose a plan</h3>
+                    <p class="sub-plan-applies">The plan you choose applies to <strong>all @Model.StoreCount store@(Model.StoreCount == 1 ? "" : "s")</strong> on your account.</p>
                     <div class="sub-plan-grid">
                         <label class="sub-plan">
                             <input type="radio" name="cycle" value="monthly" checked />
@@ -149,13 +151,24 @@
                                 Charged in Naira: ₦@monthlyNgn.ToString("N0") (at ₦@Model.Rate.ToString("N0")/$)
                             </div>
                         </div>
-                        <button type="submit" id="subBtn" class="btn btn-brand btn-lg">Pay &amp; subscribe — $@Model.MonthlyTotalUsd/month</button>
+                        <button type="button" id="subBtn" class="btn btn-brand btn-lg" onclick="openConfirm()">Pay &amp; subscribe — $@Model.MonthlyTotalUsd/month</button>
                     </div>
                     <p class="sub-note">
                         Prices are in US dollars; you'll be charged the equivalent in Naira at today's rate on Paystack's
                         secure checkout. Your subscription activates automatically once payment is confirmed.
                     </p>
                 </form>
+
+                <div id="confirmModal" class="confirm-overlay" hidden>
+                    <div class="confirm-box">
+                        <h3 class="confirm-title">Confirm upgrade</h3>
+                        <p id="confirmText" class="confirm-text"></p>
+                        <div class="confirm-actions">
+                            <button type="button" class="btn btn-outline-brand" onclick="closeConfirm()">Cancel</button>
+                            <button type="button" class="btn btn-brand" onclick="proceedPay()">Confirm &amp; pay</button>
+                        </div>
+                    </div>
+                </div>
             }
         }
     </div>
@@ -216,6 +229,30 @@
                 r.addEventListener('change', update);
             });
             update();
+
+            window.openConfirm = function () {
+                var yearly = checked() === 'yearly';
+                var total = yearly ? b.yearlyTotal : b.monthlyTotal;
+                var ngn = yearly ? b.yearlyNgn : b.monthlyNgn;
+                var period = yearly ? 'year' : 'month';
+                var planName = yearly ? 'Yearly' : 'Monthly';
+                var txt = document.getElementById('confirmText');
+                if (txt) {
+                    txt.innerHTML = "You're upgrading <strong>all " + b.stores + " store" + (b.stores === 1 ? '' : 's') +
+                        "</strong> to the <strong>" + planName + "</strong> plan.<br>" +
+                        "You'll pay <strong>$" + fmt(total) + "</strong> (₦" + fmt(ngn) + ") now on Paystack, and every store moves to the new price. Continue?";
+                }
+                var m = document.getElementById('confirmModal');
+                if (m) { m.hidden = false; }
+            };
+            window.closeConfirm = function () {
+                var m = document.getElementById('confirmModal');
+                if (m) { m.hidden = true; }
+            };
+            window.proceedPay = function () {
+                var f = document.getElementById('subscribeForm');
+                if (f) { f.submit(); }
+            };
         })();
     </script>
 }

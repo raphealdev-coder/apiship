@@ -2098,6 +2098,41 @@ a.admin-cell-title:hover { color: var(--brand); }
 .sub-total-ngn { color: var(--muted); font-size: .85rem; margin-top: .2rem; }
 .sub-note { color: var(--muted); font-size: .8rem; margin: 1rem 0 0; }
 
+.sub-plan-applies {
+    color: var(--muted);
+    font-size: .9rem;
+    margin: -.4rem 0 1rem;
+}
+
+/* Confirmation modal */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 16, 32, .55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: 1rem;
+}
+
+.confirm-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.8rem;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, .3);
+}
+
+.confirm-title { font-weight: 800; margin-bottom: .6rem; }
+.confirm-text { color: #2a3145; margin-bottom: 1.4rem; }
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .6rem;
+}
+
 @media (max-width: 600px) {
     .sub-plan-grid { grid-template-columns: 1fr; }
 }
