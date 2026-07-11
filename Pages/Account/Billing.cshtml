@@ -14,7 +14,8 @@
             <h1 class="mb-0">Store Sync &amp; API Connector</h1>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a asp-page="/Account/AddStore" class="btn btn-brand">+ Add store</a>
+            <a href="#planCard" class="btn btn-brand">Upgrade plan</a>
+            <a asp-page="/Account/AddStore" class="btn btn-outline-light">+ Add store</a>
             <a asp-page="/Account/Profile" class="btn btn-outline-light">Billing details</a>
             <form method="post" asp-page-handler="Logout" class="m-0">
                 <button type="submit" class="btn btn-outline-light">Log out</button>
@@ -119,11 +120,10 @@
                 </table>
             </div>
 
-            @if (!Model.AllSubscribed)
-            {
-                <form method="post" asp-page-handler="Subscribe" id="subscribeForm" class="sub-plan-card">
-                    <h3 class="sub-plan-title">Choose a plan</h3>
-                    <p class="sub-plan-applies">The plan you choose applies to <strong>all @Model.StoreCount store@(Model.StoreCount == 1 ? "" : "s")</strong> on your account.</p>
+                <form method="post" asp-page-handler="Subscribe" id="subscribeForm" class="sub-plan-card" style="scroll-margin-top:90px;">
+                    <a id="planCard"></a>
+                    <h3 class="sub-plan-title">@(Model.AllSubscribed ? "Upgrade or change plan" : "Choose a plan")</h3>
+                    <p class="sub-plan-applies">This plan applies to <strong>all @Model.StoreCount store@(Model.StoreCount == 1 ? "" : "s")</strong> on your account@(Model.AllSubscribed ? " — change it any time." : ".")</p>
                     <div class="sub-plan-grid">
                         <label class="sub-plan">
                             <input type="radio" name="cycle" value="monthly" checked />
@@ -169,7 +169,6 @@
                         </div>
                     </div>
                 </div>
-            }
         }
     </div>
 </section>
@@ -194,7 +193,8 @@
                 yearlyTotal: @Model.YearlyTotalUsd,
                 monthlyNgn: @Model.NgnFor(Model.MonthlyTotalUsd),
                 yearlyNgn: @Model.NgnFor(Model.YearlyTotalUsd),
-                rate: @Model.Rate.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                rate: @Model.Rate.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                subscribed: @(Model.AllSubscribed ? "true" : "false")
             };
             function fmt(n) { return Number(n).toLocaleString('en-US'); }
             var checked = function () {
@@ -220,7 +220,7 @@
                 }
                 var btn = document.getElementById('subBtn');
                 if (btn) {
-                    btn.textContent = 'Pay & subscribe — $' + fmt(total) + '/' + period;
+                    btn.textContent = (b.subscribed ? 'Upgrade & pay' : 'Pay & subscribe') + ' — $' + fmt(total) + '/' + period;
                 }
                 document.querySelectorAll('.js-fee-amt').forEach(function (el) { el.textContent = '$' + fmt(per); });
                 document.querySelectorAll('.js-fee-per').forEach(function (el) { el.textContent = perLabel; });
