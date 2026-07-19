@@ -1,0 +1,28 @@
+# Render Blueprint: one web service (Docker) + one managed Postgres database.
+# Create it via Render Dashboard -> "New +" -> "Blueprint" and point it at this repo.
+services:
+  - type: web
+    name: apiship
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # App reads the Postgres URL from DATABASE_URL (Program.cs converts it).
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apiship-db
+          property: connectionString
+      # Admin sign-in. Username defaults to "admin"; set a strong password in the
+      # dashboard (sync:false keeps it out of the repo).
+      - key: Admin__Username
+        value: admin
+      - key: Admin__Password
+        sync: false
+
+databases:
+  - name: apiship-db
+    plan: free
+    databaseName: apiship
+    user: apiship

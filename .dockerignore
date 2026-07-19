@@ -1,0 +1,13 @@
+bin/
+obj/
+.git/
+.vs/
+.vscode/
+*.user
+*.db
+*.db-shm
+*.db-wal
+*.db.bak
+SentEmails/
+Uploads/
+**/appsettings.Development.json
